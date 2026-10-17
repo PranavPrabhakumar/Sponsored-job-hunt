@@ -45,7 +45,7 @@ quiet_hours: {from: "22:30", to: "07:00"}
 
 sources:
   adzuna:
-    enabled: true
+    enabled: false         # Adzuna now asks for card details; switch on if you get a key
     results_per_page: 50
     # Free Adzuna keys allow 25 calls a minute, 250 a day, 1,000 a week and 2,500 a month.
     # These stay safely under that. Searches take turns when there are more than calls_per_run.
