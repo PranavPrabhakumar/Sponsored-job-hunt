@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-17T14:47+01:00",
+ "generated_at": "2026-10-17T15:05+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39038012958",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39039240348",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -15,15 +15,14 @@
   "adzuna": {
    "calls": 0,
    "found": 0,
-   "skipped": "no API key yet (add ADZUNA_APP_ID and ADZUNA_APP_KEY to the repository secrets)",
+   "skipped": "turned off in config.yml",
    "ok": false
   },
   "reed": {
-   "calls": 0,
-   "found": 0,
-   "skipped": "no API key yet (add REED_API_KEY to the repository secrets)",
-   "ok": false,
-   "detail_calls": 0
+   "calls": 11,
+   "found": 877,
+   "ok": true,
+   "detail_calls": 4
   }
  },
  "targets": [
@@ -87,15 +86,36 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false
+  "quiet_hours": false,
+  "sent": 1,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 0,
-  "kept": 0,
-  "rejected": 0,
-  "showing": 0
+  "checked": 473,
+  "kept": 3,
+  "rejected": 470,
+  "showing": 3
  },
- "rejected": {},
+ "rejected": {
+  "older listing": 378,
+  "title doesn't match your targets": 23,
+  "title has 'manager'": 21,
+  "salary below the visa minimum": 20,
+  "title has 'engineer'": 9,
+  "title has 'senior'": 8,
+  "employer not on the sponsor register": 3,
+  "title has 'lead'": 3,
+  "title has 'director'": 2,
+  "title has 'contractor'": 1,
+  "title has 'placement'": 1,
+  "needs security clearance": 1
+ },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
   {
@@ -107,6 +127,11 @@
    "at": "2026-10-17T14:47+01:00",
    "checked": 0,
    "kept": 0
+  },
+  {
+   "at": "2026-10-17T15:05+01:00",
+   "checked": 473,
+   "kept": 3
   }
  ]
 }
