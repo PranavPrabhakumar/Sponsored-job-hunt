@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-17T15:05+01:00",
+ "generated_at": "2026-10-17T15:08+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39039240348",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39039467161",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -19,10 +19,10 @@
    "ok": false
   },
   "reed": {
-   "calls": 11,
-   "found": 877,
+   "calls": 19,
+   "found": 1445,
    "ok": true,
-   "detail_calls": 4
+   "detail_calls": 28
   }
  },
  "targets": [
@@ -87,7 +87,7 @@
  },
  "alerts": {
   "quiet_hours": false,
-  "sent": 1,
+  "sent": 8,
   "rule_changes": 0,
   "channels": {
    "github": {
@@ -97,24 +97,37 @@
   }
  },
  "counts": {
-  "checked": 473,
-  "kept": 3,
-  "rejected": 470,
-  "showing": 3
+  "checked": 720,
+  "kept": 9,
+  "rejected": 711,
+  "showing": 9
  },
  "rejected": {
-  "older listing": 378,
-  "title doesn't match your targets": 23,
-  "title has 'manager'": 21,
-  "salary below the visa minimum": 20,
-  "title has 'engineer'": 9,
-  "title has 'senior'": 8,
-  "employer not on the sponsor register": 3,
-  "title has 'lead'": 3,
-  "title has 'director'": 2,
-  "title has 'contractor'": 1,
+  "older listing": 221,
+  "title doesn't match your targets": 175,
+  "salary below the visa minimum": 111,
+  "title has 'senior'": 47,
+  "title has 'engineer'": 45,
+  "title has 'manager'": 43,
+  "title has 'lead'": 19,
+  "recruitment agency, employer not named": 14,
+  "employer not on the sponsor register": 6,
+  "title has 'director'": 5,
+  "title has 'vp'": 4,
+  "title has 'head'": 4,
+  "title has 'principal'": 2,
+  "needs security clearance": 2,
+  "title has 'architect'": 2,
+  "title has 'vice president'": 2,
+  "title has 'apprentice'": 1,
+  "title has 'intern'": 1,
+  "part-time": 1,
+  "asks for more experience": 1,
   "title has 'placement'": 1,
-  "needs security clearance": 1
+  "title has 'lecturer'": 1,
+  "title has 'contractor'": 1,
+  "title has 'data protection'": 1,
+  "short fixed-term contract": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
@@ -132,6 +145,11 @@
    "at": "2026-10-17T15:05+01:00",
    "checked": 473,
    "kept": 3
+  },
+  {
+   "at": "2026-10-17T15:08+01:00",
+   "checked": 720,
+   "kept": 9
   }
  ]
 }
