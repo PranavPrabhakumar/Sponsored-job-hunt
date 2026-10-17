@@ -81,7 +81,7 @@ function normalizeStore(x) {
   return {
     v: 1, statuses: obj(s.statuses), snapshots: obj(s.snapshots), docs: obj(s.docs),
     cvRaw: str(s.cvRaw), cvOutline: str(s.cvOutline), cvSavedAt: str(s.cvSavedAt), details: obj(s.details),
-    settings: { ...b.settings, ...obj(s.settings) }, visits: obj(s.visits),
+    settings: { ...b.settings, ...obj(s.settings) }, visits: obj(s.visits), searchSaved: obj(s.searchSaved),
   };
 }
 function readStore() { try { return normalizeStore(JSON.parse(localStorage.getItem(STORE_KEY) || "{}")); } catch { return blankStore(); } }
@@ -1203,6 +1203,173 @@ function clearAll() {
   $("clearConfirm").hidden = true; setMsg("dataMsg", "Everything was deleted from this browser.", "ok");
 }
 
+// ------------------------------------------------------------------ search settings (saved to GitHub)
+const GH_KEY = "sponsorRadar.github";
+const GOING_RATES = "https://www.gov.uk/government/publications/skilled-worker-visa-going-rates-for-eligible-occupations";
+const NEW_ENTRANT_FLOOR = 33400;
+const MAX_SEARCHES = 30;
+const gh = {
+  get token() { try { return localStorage.getItem(GH_KEY) || ""; } catch { return ""; } },
+  set(t) { try { if (t) localStorage.setItem(GH_KEY, t); else localStorage.removeItem(GH_KEY); } catch {} },
+};
+let SEARCH = null;        // settings the last search used (data/settings.json)
+const list = (v) => arr(v).map(str).map((x) => x.trim()).filter(Boolean);
+const csv = (v) => str(v).split(",").map((x) => x.trim()).filter(Boolean);
+function currentSettings() {
+  const saved = obj(S.searchSaved);
+  const savedAt = Date.parse(saved.at || ""), ranAt = Date.parse(META.generated_at || "");
+  if (saved.settings && !isNaN(savedAt) && (isNaN(ranAt) || savedAt > ranAt)) return { ...saved.settings, _pending: saved.at };
+  if (SEARCH) return SEARCH;
+  return { targets: arr(META.targets).map((t) => ({ name: str(obj(t).name), searches: list(obj(t).searches), min_salary: num(obj(t).min_salary) || 0 })),
+    max_years_experience: 2, locations: [], include_remote: true, exclude_title_words: [], reject_if_required: [], quiet_hours: { from: "22:30", to: "07:00" } };
+}
+function targetCard(t, i) {
+  const id = (k) => `t${i}_${k}`;
+  return el("div", { class: "target", "data-i": String(i) },
+    el("div", { class: "target-head" }, el("strong", null, `Role type ${i + 1}`),
+      el("button", { type: "button", class: "quiet", onclick: () => { const all = readTargets(); all.splice(i, 1); drawTargets(all); } }, "Remove")),
+    el("label", { for: id("name") }, "Name", el("input", { id: id("name"), "data-k": "name", value: str(t.name), placeholder: "e.g. Data analyst", autocomplete: "off" })),
+    el("label", { for: id("searches") }, "Job titles to search for", el("span", { class: "help" }, "Separate with commas. Each title is searched on Reed."),
+      (() => { const ta = el("textarea", { id: id("searches"), "data-k": "searches", rows: "2", placeholder: "e.g. data analyst, bi analyst", autocomplete: "off" }); ta.value = list(t.searches).join(", "); return ta; })()),
+    el("label", { for: id("min") }, "Lowest salary that can be sponsored (£)",
+      el("span", { class: "help" }, "Roles advertised below this are skipped. ", el("a", { href: GOING_RATES, target: "_blank", rel: "noopener" }, "Check the going rate on gov.uk")),
+      el("input", { id: id("min"), "data-k": "min", type: "number", min: "0", step: "100", inputmode: "numeric", value: String(num(t.min_salary) ?? NEW_ENTRANT_FLOOR) })));
+}
+function readTargets() {
+  return [...$("targetsEditor").querySelectorAll(".target")].map((c) => ({
+    name: c.querySelector("[data-k=name]").value.trim(),
+    searches: csv(c.querySelector("[data-k=searches]").value).map((x) => x.toLowerCase()),
+    min_salary: parseInt(c.querySelector("[data-k=min]").value, 10),
+  }));
+}
+function drawTargets(targets) {
+  $("targetsEditor").replaceChildren(...targets.map(targetCard));
+  $("addTargetBtn").disabled = targets.length >= 8;
+  countSearches();
+}
+function countSearches() {
+  const n = readTargets().reduce((a, t) => a + t.searches.length, 0);
+  $("searchCount").textContent = `${n} job title${n === 1 ? "" : "s"} searched (up to ${MAX_SEARCHES})`;
+}
+function fillSearchForm() {
+  const st = currentSettings();
+  drawTargets(arr(st.targets).length ? arr(st.targets) : [{ name: "", searches: [], min_salary: NEW_ENTRANT_FLOOR }]);
+  $("s_years").value = num(st.max_years_experience) ?? 2;
+  const places = list(st.locations);
+  $("s_anywhere").checked = !places.length;
+  $("s_places").value = places.join(", ");
+  $("s_places").disabled = !places.length;
+  $("s_remote").checked = st.include_remote !== false;
+  $("s_exclude").value = list(st.exclude_title_words).join(", ");
+  $("s_require").value = list(st.reject_if_required).join(", ");
+  $("s_qfrom").value = /^\d{2}:\d{2}$/.test(str(obj(st.quiet_hours).from)) ? st.quiet_hours.from : "22:30";
+  $("s_qto").value = /^\d{2}:\d{2}$/.test(str(obj(st.quiet_hours).to)) ? st.quiet_hours.to : "07:00";
+  $("searchSource").textContent = st._pending ? `Saved ${fmtStamp(st._pending)}: used from the next search`
+    : (SEARCH && SEARCH.source === "settings.json") ? "Your saved settings" : "Default settings";
+}
+function readSearchForm() {
+  const targets = readTargets().filter((t) => t.name || t.searches.length);
+  if (!targets.length) return { error: "Add at least one role type with a name and a job title." };
+  for (const [i, t] of targets.entries()) {
+    if (!t.name) return { error: `Give role type ${i + 1} a name.` };
+    if (!t.searches.length) return { error: `Add at least one job title to search for in "${t.name}".` };
+    if (!Number.isFinite(t.min_salary) || t.min_salary < 0 || t.min_salary > 250000) return { error: `Check the salary for "${t.name}".` };
+  }
+  const total = targets.reduce((a, t) => a + t.searches.length, 0);
+  if (total > MAX_SEARCHES) return { error: `That's ${total} job titles. Keep it to ${MAX_SEARCHES} or fewer so the searches stay within Reed's limits.` };
+  const years = parseInt($("s_years").value, 10);
+  if (!Number.isFinite(years) || years < 0 || years > 15) return { error: "Set the years of experience between 0 and 15." };
+  const anywhere = $("s_anywhere").checked;
+  const places = anywhere ? [] : csv($("s_places").value);
+  if (!anywhere && !places.length) return { error: "Add at least one town or city, or tick Anywhere in the UK." };
+  return { settings: {
+    targets: targets.map((t) => ({ name: t.name, searches: t.searches, min_salary: t.min_salary })),
+    max_years_experience: years, locations: places, include_remote: $("s_remote").checked,
+    exclude_title_words: csv($("s_exclude").value).map((x) => x.toLowerCase()),
+    reject_if_required: csv($("s_require").value).map((x) => x.toLowerCase()),
+    quiet_hours: { from: $("s_qfrom").value || "22:30", to: $("s_qto").value || "07:00" },
+  } };
+}
+async function ghApi(method, path, body) {
+  let r;
+  try {
+    r = await fetch("https://api.github.com" + path, { method, cache: "no-store", headers: {
+      Accept: "application/vnd.github+json", Authorization: "Bearer " + gh.token, "X-GitHub-Api-Version": "2022-11-28",
+      ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  } catch { return { status: 0, data: null }; }
+  let data = null; try { data = await r.json(); } catch {}
+  return { status: r.status, data };
+}
+function b64(text) { let bin = ""; for (const b of new TextEncoder().encode(text)) bin += String.fromCharCode(b); return btoa(bin); }
+function ghError(status) {
+  if (status === 0) return "Couldn't reach GitHub. Check your connection and try again.";
+  if (status === 401) return "GitHub didn't accept the key: it may have expired or been deleted. Create a new one and connect again.";
+  if (status === 403 || status === 404) return `The key can't save to ${META.repo}. Check it has access to this repository with Contents set to Read and write.`;
+  return `GitHub answered with an error (${status}). Try again in a minute.`;
+}
+async function saveSearch(e) {
+  e.preventDefault();
+  const { settings, error } = readSearchForm();
+  if (error) { setMsg("searchMsg", error, "err"); return; }
+  if (!META.repo) { setMsg("searchMsg", "This page doesn't know its repository yet. Wait for the first search to finish, then try again.", "err"); return; }
+  if (!gh.token) { setMsg("searchMsg", "Connect the app to GitHub first (steps below), then save.", "err"); renderGhPanel(true); return; }
+  const btn = $("saveSearchBtn"); btn.disabled = true; setMsg("searchMsg", "Saving…");
+  const body = JSON.stringify({ version: 1, saved_at: new Date().toISOString(), ...settings }, null, 1) + "\n";
+  const path = `/repos/${META.repo}/contents/settings.json`;
+  let result = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const g = await ghApi("GET", path + "?ref=main");
+    if (g.status !== 200 && g.status !== 404) { result = g; break; }
+    const sha = g.status === 200 ? str(obj(g.data).sha) : undefined;
+    result = await ghApi("PUT", path, { message: "Update search settings from the app", content: b64(body), branch: "main", ...(sha ? { sha } : {}) });
+    if (result.status !== 409 && result.status !== 422) break;
+  }
+  btn.disabled = false;
+  if (result && (result.status === 200 || result.status === 201)) {
+    S.searchSaved = { settings, at: new Date().toISOString() }; save();
+    fillSearchForm();
+    setMsg("searchMsg", "Saved. A new search has started with these settings: reload this page in about 3 minutes to see the results.", "ok");
+  } else {
+    setMsg("searchMsg", ghError(result ? result.status : 0), "err");
+    if (result && result.status === 401) { gh.set(""); renderGhPanel(true); }
+  }
+}
+function renderGhPanel(open) {
+  const box = $("ghPanel"), repo = META.repo || "your repository", name = str(META.repo).split("/")[1] || "your repository";
+  if (gh.token) {
+    box.replaceChildren(el("p", null, el("strong", null, "Connected to GitHub. "), `Saving updates ${repo}. The key is stored in this browser only. `,
+      el("button", { type: "button", class: "quiet", onclick: () => { gh.set(""); renderGhPanel(true); setMsg("searchMsg", "Disconnected. The key is no longer stored in this browser; you can also delete it on GitHub.", "ok"); } }, "Disconnect")));
+    return;
+  }
+  const input = el("input", { id: "ghToken", type: "password", autocomplete: "off", placeholder: "github_pat_…", "aria-label": "GitHub key" });
+  const msg = el("span", { class: "status-msg", id: "ghMsg", role: "status" });
+  const connect = async () => {
+    const t = input.value.trim();
+    if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(t)) { msg.textContent = "That doesn't look like a GitHub key. It starts with github_pat_."; msg.className = "status-msg err"; return; }
+    gh.set(t); msg.textContent = "Checking…"; msg.className = "status-msg";
+    const r = META.repo ? await ghApi("GET", `/repos/${META.repo}`) : { status: 200 };
+    if (r.status === 200) { renderGhPanel(false); setMsg("searchMsg", "Connected. Now press Save and search now.", "ok"); }
+    else { gh.set(""); msg.textContent = ghError(r.status); msg.className = "status-msg err"; }
+  };
+  box.replaceChildren(
+    el("p", null, el("strong", null, "Connect to GitHub to save (one time). "), "The search runs in your GitHub repository, so the app needs a key that can update it."),
+    el("details", { open: open ? true : null }, el("summary", { class: "small" }, "How to create the key"),
+      el("ol", null,
+        el("li", null, "Open ", el("a", { href: "https://github.com/settings/personal-access-tokens/new", target: "_blank", rel: "noopener" }, "github.com/settings/personal-access-tokens/new"), " (on a phone, use the desktop site)."),
+        el("li", null, "Token name: ", el("code", null, "Sponsor Radar"), ". Expiration: 1 year."),
+        el("li", null, "Repository access: ", el("strong", null, "Only select repositories"), ", then pick ", el("strong", null, name), "."),
+        el("li", null, "Permissions: add ", el("strong", null, "Contents"), " and set it to ", el("strong", null, "Read and write"), ". Leave everything else as it is."),
+        el("li", null, "Press ", el("strong", null, "Generate token"), ", copy it, and paste it below.")),
+      el("p", { class: "help" }, "The key can only change files in this one repository. It's kept in this browser only, never in backups, and you can delete it on GitHub at any time.")),
+    el("div", { class: "row" }, input, el("button", { type: "button", onclick: connect }, "Connect"), msg));
+}
+function wireSearch() {
+  $("searchForm").addEventListener("submit", saveSearch);
+  $("searchForm").addEventListener("input", (e) => { if (e.target.dataset.k === "searches") countSearches(); });
+  $("addTargetBtn").addEventListener("click", () => { const all = readTargets(); all.push({ name: "", searches: [], min_salary: NEW_ENTRANT_FLOOR }); drawTargets(all); });
+  $("s_anywhere").addEventListener("change", (e) => { $("s_places").disabled = e.target.checked; if (!e.target.checked) $("s_places").focus(); });
+}
+
 // ------------------------------------------------------------------ boot
 function wire() {
   $("q").addEventListener("input", (e) => { UI.q = e.target.value; UI.shown = PAGE; clearTimeout(wire.t); wire.t = setTimeout(renderRoles, 120); });
@@ -1226,11 +1393,13 @@ function wire() {
 async function boot() {
   try { if (!sessionStorage.getItem("sr.session")) { S.visits.prev = S.visits.last || null; S.visits.last = new Date().toISOString(); sessionStorage.setItem("sr.session", "1"); save(); } }
   catch { /* private mode: every visit counts as new */ }
-  wire(); fillDetails();
+  wire(); wireSearch(); fillDetails();
   $("cvRaw").value = S.cvRaw; $("cvOutline").value = S.cvOutline;
-  const [jobs, meta, skills] = await Promise.all([
+  const [jobs, meta, skills, search] = await Promise.all([
     getJson("data/jobs.json").catch((e) => ({ __error: e })), getJson("data/meta.json").catch(() => ({})), getJson("skills.json").catch(() => []),
+    getJson("data/settings.json").catch(() => null),
   ]);
+  SEARCH = search && Array.isArray(search.targets) ? search : null;
   compileSkills(skills);
   if (jobs.__error && !/404/.test(String(jobs.__error.message))) LOAD_ERROR = String(jobs.__error.message);
   META = obj(meta);
@@ -1240,7 +1409,7 @@ async function boot() {
   rankAll();
   for (const id of Object.keys(S.statuses)) if (BY_ID.has(id)) S.snapshots[id].fitPct = BY_ID.get(id)._fitPct;
   save();
-  renderAll(); renderCvPreview();
+  renderAll(); renderCvPreview(); fillSearchForm(); renderGhPanel(false);
   document.documentElement.dataset.ready = "1";
 }
 window.__radar = { parseOutline, rawToOutline, tailor: (id) => tailor(BY_ID.get(id)), renderTemplate, clause, article, PREFS, get S() { return S; }, buildPdf, findSkills };

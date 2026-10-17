@@ -104,6 +104,7 @@ def build(dest, extra=110, drop=None):
     (dest / "data/jobs.json").write_text(json.dumps({"generated_at": data["generated_at"], "jobs": jobs}))
     meta["counts"]["showing"] = len(jobs)
     (dest / "data/meta.json").write_text(json.dumps(meta))
+    shutil.copy(tmp / "docs/data/settings.json", dest / "data/settings.json")
     shutil.rmtree(tmp)
     return len(jobs)
 

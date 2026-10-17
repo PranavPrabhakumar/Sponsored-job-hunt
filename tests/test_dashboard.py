@@ -63,6 +63,90 @@ def pdf_from_download(dl):
     return r, "\n".join(p.extract_text() for p in r.pages)
 
 
+def settings_tests(browser, url):
+    import base64 as b64
+    calls = []
+    state = {"sha": None, "put_status": 201, "repo_status": 200}
+
+    def handler(route):
+        req = route.request
+        u = req.url
+        calls.append((req.method, u, req.headers.get("authorization"), req.post_data))
+        if req.method == "GET" and u.endswith("/repos/someone/sponsor-radar"):
+            return route.fulfill(status=state["repo_status"], json={"full_name": "someone/sponsor-radar"} if state["repo_status"] == 200 else {"message": "Bad credentials"},
+                                 headers={"access-control-allow-origin": "*"})
+        if "/contents/settings.json" in u and req.method == "GET":
+            if state["sha"]:
+                return route.fulfill(status=200, json={"sha": state["sha"], "content": ""}, headers={"access-control-allow-origin": "*"})
+            return route.fulfill(status=404, json={"message": "Not Found"}, headers={"access-control-allow-origin": "*"})
+        if "/contents/settings.json" in u and req.method == "PUT":
+            if state["put_status"] in (200, 201):
+                state["sha"] = "sha-" + str(len(calls))
+            return route.fulfill(status=state["put_status"], json={"content": {"sha": state["sha"]}}, headers={"access-control-allow-origin": "*"})
+        if req.method == "OPTIONS":
+            return route.fulfill(status=204, headers={"access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "GET,PUT"})
+        return route.fulfill(status=404, json={})
+
+    ctx, page, errs = new_page(browser, url)
+    page.route("https://api.github.com/**", handler)
+    names = page.eval_on_selector_all("#targetsEditor [data-k=name]", "els => els.map(e => e.value)")
+    check("settings form shows the current role types", names == ["Data & insight analyst", "Risk, credit & fraud analyst", "Junior data scientist"], names)
+    check("settings form: years and places", page.input_value("#s_years") == "2" and page.is_checked("#s_anywhere") and page.is_disabled("#s_places"))
+    check("settings form: search count", "11 job titles searched" in page.inner_text("#searchCount"), page.inner_text("#searchCount"))
+    page.click("#saveSearchBtn")
+    check("save needs a GitHub key first", "Connect the app to GitHub first" in page.inner_text("#searchMsg") and page.locator("#ghPanel details[open]").count() == 1)
+    page.fill("#ghToken", "not-a-key"); page.click("#ghPanel button:has-text('Connect')")
+    check("bad key format is caught", "doesn't look like a GitHub key" in page.inner_text("#ghMsg"))
+    state["repo_status"] = 401
+    page.fill("#ghToken", "github_pat_" + "A" * 40); page.click("#ghPanel button:has-text('Connect')")
+    page.wait_for_function("document.getElementById('ghMsg') && document.getElementById('ghMsg').textContent.includes('didn')")
+    check("refused key isn't kept", page.evaluate("localStorage.getItem('sponsorRadar.github')") is None)
+    state["repo_status"] = 200
+    page.fill("#ghToken", "github_pat_" + "B" * 40); page.click("#ghPanel button:has-text('Connect')")
+    page.wait_for_function("document.getElementById('ghPanel').innerText.includes('Connected to GitHub')")
+    check("connect stores the key", page.evaluate("localStorage.getItem('sponsorRadar.github')") == "github_pat_" + "B" * 40)
+    # validation
+    page.fill("#t0_name", "")
+    page.click("#saveSearchBtn")
+    check("validation: role type needs a name", "Give role type 1 a name" in page.inner_text("#searchMsg"))
+    page.fill("#t0_name", "Data & insight analyst")
+    page.uncheck("#s_anywhere"); page.fill("#s_places", "")
+    page.click("#saveSearchBtn")
+    check("validation: places needed when not anywhere", "Add at least one town or city" in page.inner_text("#searchMsg"))
+    page.fill("#s_places", "Leeds, Manchester")
+    page.click("#addTargetBtn")
+    page.fill("#t3_name", "Pricing analyst"); page.fill("#t3_searches", "Pricing Analyst, actuarial analyst"); page.fill("#t3_min", "34000")
+    page.fill("#s_years", "3")
+    page.click("#saveSearchBtn")
+    page.wait_for_function("document.getElementById('searchMsg').textContent.startsWith('Saved')", timeout=5000)
+    puts = [c for c in calls if c[0] == "PUT"]
+    body = json.loads(puts[-1][3]) if puts else {}
+    saved = json.loads(b64.b64decode(body.get("content", "")).decode("utf-8")) if body else {}
+    check("saved over the GitHub API with the key", puts and puts[-1][2] == "Bearer github_pat_" + "B" * 40 and body.get("branch") == "main" and "sha" not in body)
+    check("saved settings content", len(saved.get("targets", [])) == 4 and saved["targets"][3] == {"name": "Pricing analyst", "searches": ["pricing analyst", "actuarial analyst"], "min_salary": 34000}
+          and saved["locations"] == ["Leeds", "Manchester"] and saved["max_years_experience"] == 3 and saved["include_remote"] is True, saved)
+    check("form shows the pending save", "used from the next search" in page.inner_text("#searchSource"))
+    page.click("#saveSearchBtn")
+    page.wait_for_function("document.querySelectorAll('#searchMsg').length && document.getElementById('searchMsg').textContent.startsWith('Saved')", timeout=5000)
+    body2 = json.loads([c for c in calls if c[0] == "PUT"][-1][3])
+    check("second save sends the file's sha", body2.get("sha", "").startswith("sha-"))
+    state["put_status"] = 403
+    page.click("#saveSearchBtn")
+    page.wait_for_function("document.getElementById('searchMsg').classList.contains('err')", timeout=5000)
+    check("permission error is explained", "Contents set to Read and write" in page.inner_text("#searchMsg"))
+    state["put_status"] = 401
+    page.click("#saveSearchBtn")
+    page.wait_for_function("document.getElementById('searchMsg').textContent.includes('expired')", timeout=5000)
+    check("expired key is removed", page.evaluate("localStorage.getItem('sponsorRadar.github')") is None and "How to create the key" in page.inner_text("#ghPanel"))
+    with page.expect_download() as d:
+        page.click("#backupBtn")
+    check("backup never contains the GitHub key", "github_pat_" not in Path(d.value.path()).read_text())
+    page.reload(); page.wait_for_selector("html[data-ready='1']")
+    check("pending settings survive a reload", len(page.eval_on_selector_all("#targetsEditor .target", "e => e")) == 4 and page.input_value("#s_places") == "Leeds, Manchester")
+    check("no errors in settings flows", not errs, "; ".join(errs[:3]))
+    ctx.close()
+
+
 def main():
     tmp = Path(tempfile.mkdtemp())
     site = tmp / "site"
@@ -234,7 +318,10 @@ def main():
         shutil.copy(tmp / "phone.png", "/tmp/claude-0/radar-phone.png")
         ctx.close()
 
-        # 9. Empty site before the first run
+        # 9. Search settings saved to GitHub (GitHub API mocked)
+        settings_tests(browser, url)
+
+        # 10. Empty site before the first run
         empty = tmp / "empty"
         shutil.copytree(site, empty, ignore=shutil.ignore_patterns("data"))
         httpd3, url3 = serve(empty)

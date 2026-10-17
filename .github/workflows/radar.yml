@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}          # "Run workflow" button in the Actions tab
   push:
     branches: [main]
-    paths: ["config.yml", "radar/**", "docs/**", "!docs/data/**", ".github/workflows/**"]
+    paths: ["config.yml", "settings.json", "radar/**", "docs/**", "!docs/data/**", ".github/workflows/**"]
 
 permissions:
   contents: write

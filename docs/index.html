@@ -68,6 +68,38 @@
     <div class="row"><button id="more" hidden>Show more</button></div>
   </section>
 
+  <section aria-labelledby="searchH" id="search">
+    <div class="sec-head"><h2 id="searchH">What to search for</h2><span class="small muted" id="searchSource"></span></div>
+    <form class="panel" id="searchForm" novalidate>
+      <p class="small muted">The radar searches Reed every 2 hours for these roles and keeps the ones at licensed sponsors. Saving here starts a new search straight away.</p>
+      <div id="targetsEditor" class="targets"></div>
+      <div class="row"><button type="button" id="addTargetBtn">Add a role type</button><span class="small muted" id="searchCount"></span></div>
+      <div class="grid2">
+        <label for="s_years">Most years of experience a role may ask for<span class="help">Roles asking for more are skipped. One more is allowed for junior and graduate titles.</span><input id="s_years" type="number" min="0" max="15" inputmode="numeric"></label>
+      </div>
+      <fieldset>
+        <legend>Where</legend>
+        <label class="check" for="s_anywhere"><input type="checkbox" id="s_anywhere"> Anywhere in the UK</label>
+        <label for="s_places">Towns or cities <span class="help">Separate with commas, for example: London, Manchester, Leeds</span><input id="s_places" autocomplete="off"></label>
+        <label class="check" for="s_remote"><input type="checkbox" id="s_remote"> Also include remote roles</label>
+      </fieldset>
+      <details>
+        <summary class="small">More filters</summary>
+        <div style="display:grid; gap:10px; margin-top:8px">
+          <label for="s_exclude">Leave out job titles containing <span class="help">Separate with commas.</span><textarea id="s_exclude" rows="3"></textarea></label>
+          <label for="s_require">Skip adverts that require <span class="help">Qualifications or tools you don't have. Separate with commas.</span><textarea id="s_require" rows="2"></textarea></label>
+        </div>
+      </details>
+      <fieldset>
+        <legend>Quiet hours for alerts</legend>
+        <p class="help">Roles found in these hours are sent to you when they end.</p>
+        <div class="grid2"><label for="s_qfrom">From<input id="s_qfrom" type="time"></label><label for="s_qto">To<input id="s_qto" type="time"></label></div>
+      </fieldset>
+      <div class="row"><button class="primary" type="submit" id="saveSearchBtn">Save and search now</button><span class="status-msg" id="searchMsg" role="status"></span></div>
+      <div id="ghPanel" class="gh"></div>
+    </form>
+  </section>
+
   <section aria-labelledby="cvH" id="cv">
     <div class="sec-head"><h2 id="cvH">My CV</h2><span class="small muted" id="cvSaved"></span></div>
     <div class="panel">

@@ -192,3 +192,11 @@ pre.guide { margin: 0; white-space: pre-wrap; font-family: var(--font-mono); fon
 footer { border-top: 1px solid var(--line); padding-top: 14px; font-size: 0.86rem; color: var(--muted); display: grid; gap: 6px; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; z-index: 50; max-width: calc(100vw - 32px); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Search settings */
+.targets { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.target { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; background: var(--bg); }
+.target-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.gh { border-radius: 8px; padding: 12px; background: var(--sunk); display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; font-size: 0.9rem; }
+.gh ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.gh code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface); padding: 1px 5px; border-radius: 4px; }

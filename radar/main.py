@@ -11,6 +11,7 @@ from pathlib import Path
 import yaml
 
 from . import notify, rules
+from . import settings as app_settings
 from .govuk import check_rule_pages
 from .scoring import SkillExtractor, TargetClassifier, clean_title, overall_score, sponsor_evidence
 from .sources import apply_reed_details, fetch_adzuna, fetch_reed, reed_details
@@ -64,6 +65,16 @@ class Judge:
         except Exception:
             pass  # judge on the snippet instead
 
+    def place_ok(self, job):
+        """True when the role is in one of the chosen places (or remote, if allowed). No places = anywhere."""
+        places = [fold(p).strip() for p in self.cfg.get("locations") or [] if str(p).strip()]
+        if not places:
+            return True
+        where = f"{fold(job.get('location', ''))} {fold(job.get('title', ''))}"
+        if any(re.search(r"(?<![a-z])" + re.escape(p) + r"(?![a-z])", where) for p in places):
+            return True
+        return bool(self.cfg.get("include_remote", True)) and re.search(r"\bremote\b|work from home|home[- ]based", where) is not None
+
     def still_valid(self, record):
         """Re-check a role already on the dashboard against the current title rules and settings."""
         title = record.get("title", "")
@@ -75,7 +86,7 @@ class Judge:
         named = re.match(r"^(.*) \(via .+\)$", record.get("company", ""))
         if named and self.skills.find(named.group(1)):
             return False
-        return True
+        return self.place_ok(record)
 
     def judge(self, job):
         """Return (record, None) when kept, or (None, reason) when rejected.
@@ -92,6 +103,8 @@ class Judge:
         target, rel = self.clf.classify(title)
         if not target or rel < float(cfg.get("min_title_match", 0.45)):
             return None, "title doesn't match your targets"
+        if not self.place_ok(job):
+            return None, "outside your chosen places"
 
         company = job.get("company", "")
         via = None
@@ -209,8 +222,13 @@ def run(root=".", env=None, now=None, session=None, sleep=True, notify_on=True):
     now = now or uk_now()
     today = now.date()
     cfg = yaml.safe_load((root / "config.yml").read_text(encoding="utf-8")) or {}
+    cfg, settings_info = app_settings.apply(root, cfg)
     state_path, jobs_path, meta_path = root / "data/state.json", root / "docs/data/jobs.json", root / "docs/data/meta.json"
     state = load_json(state_path, {})
+    settings_changed = state.get("settings_hash") != app_settings.fingerprint(cfg)
+    if settings_changed:
+        state["seen"] = {}  # judge every listing again under the new settings
+        state["settings_hash"] = app_settings.fingerprint(cfg)
     session = session or make_session()
     repo = env.get("GITHUB_REPOSITORY")
     meta = {
@@ -222,6 +240,7 @@ def run(root=".", env=None, now=None, session=None, sleep=True, notify_on=True):
         "targets": [{"name": t.get("name"), "min_salary": t.get("min_salary"), "salary_note": t.get("salary_note"),
                      "searches": t.get("searches")} for t in cfg.get("targets") or []],
         "salary_rules_checked": str(cfg.get("salary_rules_checked") or ""),
+        "settings": {**settings_info, "changed_this_run": settings_changed},
     }
 
     index = None
@@ -326,6 +345,8 @@ def run(root=".", env=None, now=None, session=None, sleep=True, notify_on=True):
 
     save_json(jobs_path, {"generated_at": meta["generated_at"], "jobs": final}, compact=True)
     save_json(meta_path, meta)
+    save_json(root / "docs/data/settings.json", {**app_settings.effective(cfg), "source": settings_info.get("source"),
+                                                  "saved_at": settings_info.get("saved_at", "")})
     save_json(state_path, state)
 
     configured = [s for s in (az, rd) if not s.skipped]

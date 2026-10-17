@@ -298,6 +298,33 @@ class EndToEnd(unittest.TestCase):
         self.assertNotIn("reed:9001", after)
         self.assertEqual(self.read("docs/data/meta.json")["counts"]["removed_by_new_rules"], 1)
 
+    def test_settings_from_the_app(self):
+        env = dict(self.env)
+        when = datetime(2026, 10, 17, 9, 17, tzinfo=UK)
+        (self.dir / "settings.json").write_text(json.dumps({"locations": ["Leeds", "Glasgow"], "include_remote": False, "saved_at": "2026-10-17T09:00:00Z"}))
+        run(self.dir, env=env, now=when, session=fakes.make_session(), sleep=False, notify_on=False)
+        jobs = {j["id"]: j for j in self.read("docs/data/jobs.json")["jobs"]}
+        self.assertTrue(jobs)
+        self.assertTrue(all(any(p in j["location"] for p in ("Leeds", "Glasgow")) for j in jobs.values()), [j["location"] for j in jobs.values()])
+        meta = self.read("docs/data/meta.json")
+        self.assertGreater(meta["rejected"].get("outside your chosen places", 0), 0)
+        self.assertEqual(meta["settings"]["source"], "settings.json")
+        published = self.read("docs/data/settings.json")
+        self.assertEqual(published["locations"], ["Leeds", "Glasgow"])
+        self.assertEqual(len(published["targets"]), 3)
+        # Widening the places re-checks listings that were turned away, without re-adding the ones kept
+        (self.dir / "settings.json").write_text(json.dumps({"locations": [], "saved_at": "2026-10-17T10:00:00Z"}))
+        run(self.dir, env=env, now=datetime(2026, 10, 17, 11, 17, tzinfo=UK), session=fakes.make_session(), sleep=False, notify_on=False)
+        jobs2 = {j["id"] for j in self.read("docs/data/jobs.json")["jobs"]}
+        self.assertTrue(set(jobs) < jobs2, (set(jobs), jobs2))
+        self.assertIn("adzuna:101", jobs2)        # London, kept now
+        self.assertTrue(self.read("docs/data/meta.json")["settings"]["changed_this_run"])
+        # Narrowing the places removes roles already shown
+        (self.dir / "settings.json").write_text(json.dumps({"locations": ["Bristol"], "include_remote": False}))
+        run(self.dir, env=env, now=datetime(2026, 10, 17, 13, 17, tzinfo=UK), session=fakes.make_session(adzuna={}, reed={}), sleep=False, notify_on=False)
+        left = self.read("docs/data/jobs.json")["jobs"]
+        self.assertTrue(all("Bristol" in j["location"] for j in left), [j["location"] for j in left])
+
     def test_quiet_hours_hold_then_morning(self):
         gh = fakes.GitHubFake()
         run(self.dir, env=self.env, now=datetime(2026, 10, 17, 2, 17, tzinfo=UK),
@@ -342,6 +369,26 @@ class EndToEnd(unittest.TestCase):
         run(self.dir, env=env, now=datetime(2026, 11, 3, 11, 17, tzinfo=UK),
             session=fakes.make_session(adzuna_status=401, github=gh, slug_updated={"going-rates": "2026-11-02T10:00:00Z"}), sleep=False)
         self.assertEqual(len(gh.comments), 1)
+
+
+class AppSettings(unittest.TestCase):
+    def test_sanitize(self):
+        from radar import settings as st
+        out = st.sanitize({
+            "targets": [{"name": "  Pricing analyst ", "searches": "Pricing Analyst, pricing analyst , ,actuarial analyst", "min_salary": "34000"},
+                        {"name": "", "searches": ["x"]}, {"name": "No searches", "searches": []}, "junk"],
+            "max_years_experience": "3", "locations": "Leeds, Manchester ,", "include_remote": 0,
+            "exclude_title_words": ["Senior", "senior", "Manager"], "quiet_hours": {"from": "23:00", "to": "7am"},
+            "unknown": 1})
+        self.assertEqual(out["targets"], [{"name": "Pricing analyst", "searches": ["pricing analyst", "actuarial analyst"], "min_salary": 34000, "salary_note": ""}])
+        self.assertEqual(out["max_years_experience"], 3)
+        self.assertEqual(out["locations"], ["Leeds", "Manchester"])
+        self.assertIs(out["include_remote"], False)
+        self.assertEqual(out["exclude_title_words"], ["senior", "manager"])
+        self.assertEqual(out["quiet_hours"], {"from": "23:00", "to": "07:00"})
+        self.assertNotIn("unknown", out)
+        self.assertEqual(st.sanitize({"targets": []}), {})
+        self.assertEqual(st.sanitize("nonsense"), {})
 
 
 class Messages(unittest.TestCase):
