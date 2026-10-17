@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-17T15:23+01:00",
+ "generated_at": "2026-10-17T15:33+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39040478442",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39041236465",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -22,7 +22,7 @@
    "calls": 19,
    "found": 1445,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 16
   }
  },
  "targets": [
@@ -60,6 +60,10 @@
   }
  ],
  "salary_rules_checked": "2026-10-17",
+ "settings": {
+  "source": "config.yml",
+  "changed_this_run": true
+ },
  "rules": {
   "salary_rules_checked": "2026-10-17",
   "pages": [
@@ -89,13 +93,40 @@
   "quiet_hours": false
  },
  "counts": {
-  "checked": 0,
+  "checked": 715,
   "kept": 0,
-  "rejected": 0,
+  "rejected": 715,
   "showing": 5,
   "removed_by_new_rules": 0
  },
- "rejected": {},
+ "rejected": {
+  "older listing": 223,
+  "title doesn't match your targets": 156,
+  "salary below the visa minimum": 111,
+  "title has 'senior'": 47,
+  "title has 'engineer'": 45,
+  "title has 'manager'": 43,
+  "title has 'lead'": 19,
+  "title has 'business analyst'": 18,
+  "recruitment agency, employer not named": 13,
+  "employer not on the sponsor register": 6,
+  "title has 'avp'": 6,
+  "title has 'director'": 5,
+  "title has 'vp'": 4,
+  "title has 'head'": 4,
+  "title has 'principal'": 2,
+  "title has 'architect'": 2,
+  "title has 'vice president'": 2,
+  "title has 'apprentice'": 1,
+  "title has 'intern'": 1,
+  "part-time": 1,
+  "title has 'placement'": 1,
+  "title has 'lecturer'": 1,
+  "title has 'contractor'": 1,
+  "title has 'data protection'": 1,
+  "needs security clearance": 1,
+  "short fixed-term contract": 1
+ },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
   {
@@ -126,6 +157,11 @@
   {
    "at": "2026-10-17T15:23+01:00",
    "checked": 0,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-17T15:33+01:00",
+   "checked": 715,
    "kept": 0
   }
  ]

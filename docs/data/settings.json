@@ -1,0 +1,91 @@
+{
+ "targets": [
+  {
+   "name": "Data & insight analyst",
+   "searches": [
+    "data analyst",
+    "bi analyst",
+    "business intelligence analyst",
+    "insight analyst",
+    "insights analyst",
+    "reporting analyst"
+   ],
+   "min_salary": 33400,
+   "salary_note": "Data analysts (SOC 3544), new-entrant rate"
+  },
+  {
+   "name": "Risk, credit & fraud analyst",
+   "searches": [
+    "risk analyst",
+    "credit analyst",
+    "fraud analyst",
+    "financial crime analyst"
+   ],
+   "min_salary": 35140,
+   "salary_note": "Risk analysts (SOC 2431), new-entrant rate"
+  },
+  {
+   "name": "Junior data scientist",
+   "searches": [
+    "data scientist"
+   ],
+   "min_salary": 38570,
+   "salary_note": "Statisticians and data scientists (SOC 2433), new-entrant rate"
+  }
+ ],
+ "max_years_experience": 2,
+ "locations": [],
+ "include_remote": true,
+ "exclude_title_words": [
+  "senior",
+  "sr",
+  "lead",
+  "principal",
+  "head",
+  "manager",
+  "director",
+  "staff",
+  "chief",
+  "vp",
+  "vice president",
+  "architect",
+  "engineer",
+  "data entry",
+  "data protection",
+  "apprentice",
+  "apprenticeship",
+  "intern",
+  "internship",
+  "placement",
+  "teacher",
+  "lecturer",
+  "part time",
+  "part-time",
+  "phd",
+  "postdoc",
+  "contractor",
+  "avp",
+  "assistant vice president",
+  "qa",
+  "tester",
+  "testing",
+  "business analyst"
+ ],
+ "reject_if_required": [
+  "acca",
+  "cima",
+  "cfa",
+  "frm",
+  "actuarial exams",
+  "dbt",
+  "snowflake",
+  "sap successfactors",
+  "sits"
+ ],
+ "quiet_hours": {
+  "from": "22:30",
+  "to": "07:00"
+ },
+ "source": "config.yml",
+ "saved_at": ""
+}
