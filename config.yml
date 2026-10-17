@@ -1,0 +1,60 @@
+# Sponsor Radar settings.
+# Edit this file on GitHub (pencil icon) and commit: the next run uses the new settings.
+# Nothing personal belongs here. Your CV, details and choices stay in your browser.
+
+timezone: Europe/London
+
+# Roles to look for. Each target has the job titles to search for and the lowest salary
+# that can be sponsored for it (Skilled Worker minimum). Check the minimums on gov.uk
+# whenever the dashboard says the rules pages have changed, then update the date below.
+targets:
+  - name: Data & insight analyst
+    searches: ["data analyst", "bi analyst", "business intelligence analyst", "insight analyst", "insights analyst", "reporting analyst"]
+    min_salary: 33400
+    salary_note: "Data analysts (SOC 3544), new-entrant rate"
+  - name: Risk, credit & fraud analyst
+    searches: ["risk analyst", "credit analyst", "fraud analyst", "financial crime analyst"]
+    min_salary: 35140
+    salary_note: "Risk analysts (SOC 2431), new-entrant rate"
+  - name: Junior data scientist
+    searches: ["data scientist"]
+    min_salary: 38570
+    salary_note: "Statisticians and data scientists (SOC 2433), new-entrant rate"
+
+# The date you last checked the salary minimums above against gov.uk.
+salary_rules_checked: 2026-10-17
+
+# Listings
+max_days_old: 3            # only listings posted in the last N days
+keep_days: 30              # how long a role stays on the dashboard after it's found
+max_years_experience: 2    # reject roles asking for more years than this (one more is allowed for junior/graduate titles)
+min_title_match: 0.45      # 0-1: how closely a job title must match one of your searches
+alert_min_score: 0.55      # 0-1: only roles scoring at least this are sent as alerts
+show_possible_sponsors: true   # also keep roles where the sponsor licence match is less certain
+
+# Words that rule a title out (lower case).
+exclude_title_words: [senior, sr, lead, principal, head, manager, director, staff, chief, vp, "vice president",
+  architect, engineer, "data entry", "data protection", apprentice, apprenticeship, intern, internship,
+  placement, teacher, lecturer, "part time", "part-time", phd, postdoc, contractor]
+
+# Reject a role when the ad says one of these is required (lower case).
+reject_if_required: [acca, cima, cfa, frm, "actuarial exams", dbt, snowflake, "sap successfactors", sits]
+
+# Alerts: quiet hours (UK time). Roles found then are sent when quiet hours end.
+quiet_hours: {from: "22:30", to: "07:00"}
+
+sources:
+  adzuna:
+    enabled: true
+    results_per_page: 50
+    # Free Adzuna keys allow 25 calls a minute, 250 a day, 1,000 a week and 2,500 a month.
+    # These stay safely under that. Searches take turns when there are more than calls_per_run.
+    calls_per_run: 6
+    max_calls_per_day: 120
+    max_calls_per_week: 900
+    max_calls_per_month: 2400
+  reed:
+    enabled: true
+    results_to_take: 100
+    direct_employers_only: true
+    max_details_per_run: 60

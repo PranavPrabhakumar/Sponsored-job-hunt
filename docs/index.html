@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sponsor Radar</title>
+<meta name="description" content="New UK roles at licensed visa sponsors, ranked by machine learning. No AI.">
+<meta name="theme-color" content="#0d6b62">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%230d6b62'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='white' stroke-width='2'/%3E%3Ccircle cx='27' cy='13' r='3' fill='white'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">UK Skilled Worker sponsorship · no AI</span>
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/>
+        <g class="sweep"><path d="M20 20 L20 1.5 A18.5 18.5 0 0 1 35 9 Z" fill="var(--accent)" fill-opacity=".35"/></g>
+        <circle cx="27" cy="12.5" r="2.6" fill="var(--accent)"/>
+        <circle cx="20" cy="20" r="2" fill="currentColor"/>
+      </svg>
+      <h1>Sponsor Radar</h1>
+    </div>
+    <p class="muted">New UK roles at licensed visa sponsors, ranked for you with machine learning. Your CV and choices stay in this browser.</p>
+    <div class="run-line" id="runLine"><span class="dot" id="runDot" aria-hidden="true"></span><span id="runText">Loading the latest search…</span></div>
+  </header>
+
+  <div class="notices" id="notices" aria-live="polite"></div>
+
+  <section id="start" class="panel" aria-labelledby="startH" hidden>
+    <h2 id="startH">Get started</h2>
+    <ol class="steps">
+      <li id="stepCv"><span class="tick" aria-hidden="true"></span><a href="#cv">Add your CV, so roles are ranked by how well they fit you</a></li>
+      <li id="stepDetails"><span class="tick" aria-hidden="true"></span><a href="#details">Fill in your details for CVs and cover letters</a></li>
+      <li id="stepMarks"><span class="tick" aria-hidden="true"></span><a href="#roles">Mark a few roles as Interested or Not for me, so the ranking learns what you like</a></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="rolesH" id="roles">
+    <div class="sec-head"><h2 id="rolesH">Roles</h2><span class="small muted" id="rolesCount"></span></div>
+    <div class="controls">
+      <div class="chips" role="group" aria-label="Filter by status" id="chips"></div>
+      <div class="filters">
+        <input type="search" id="q" placeholder="Search role, company, location or skills" aria-label="Search roles">
+        <select id="familyFilter" aria-label="Filter by target"></select>
+        <select id="sponsorFilter" aria-label="Filter by sponsorship evidence">
+          <option value="all">All sponsor matches</option>
+          <option value="Likely">Likely sponsors only</option>
+        </select>
+        <select id="sort" aria-label="Sort roles">
+          <option value="best">Best match</option>
+          <option value="newest">Newest</option>
+          <option value="closing">Closing soonest</option>
+          <option value="salary">Highest salary</option>
+        </select>
+      </div>
+      <div class="toggles">
+        <label class="check" for="salaryOnly"><input type="checkbox" id="salaryOnly"> Only salaries that meet the visa minimum</label>
+      </div>
+    </div>
+    <div class="cards" id="cards" aria-live="polite"></div>
+    <div class="row"><button id="more" hidden>Show more</button></div>
+  </section>
+
+  <section aria-labelledby="cvH" id="cv">
+    <div class="sec-head"><h2 id="cvH">My CV</h2><span class="small muted" id="cvSaved"></span></div>
+    <div class="panel">
+      <p class="small muted">Your CV is used in this browser only: to rank roles by fit and to build tailored CVs and cover letters from your own bullet points. It is never uploaded.</p>
+      <div class="row">
+        <label class="btn" for="cvFile">Upload PDF, Word or text<input type="file" id="cvFile" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="sr-only"></label>
+        <span class="small muted" id="cvFileMsg" role="status"></span>
+      </div>
+      <label for="cvRaw">CV text <span class="help">Upload or paste your CV, then turn it into the outline below.</span>
+        <textarea id="cvRaw" rows="8" spellcheck="true"></textarea></label>
+      <div class="row"><button id="toOutline">Turn into an outline</button><span class="status-msg" id="outlineMsg" role="status"></span></div>
+      <label for="cvOutline">CV outline <span class="help">This is what the tailoring reads. Check every line: fix titles, organisations and dates, and keep one bullet per line.</span>
+        <textarea id="cvOutline" class="code" rows="18" spellcheck="true"></textarea></label>
+      <details>
+        <summary class="small">How the outline works</summary>
+        <pre class="guide"># Profile
+Two or three sentences about you.
+
+# Skills
+Programming: Python, SQL, R
+Visualisation: Power BI, Tableau
+
+# Experience
+## Job title | Organisation | Place | May 2025 – Jun 2025
+- One achievement per line, starting with a verb
+
+# Education
+## Degree | University | Place | Oct 2023 – Sep 2024
+- Dissertation or modules
+
+# Projects
+## Project name | 2024
+- What you did and the result
+
+# Certifications
+- Name (Issuer)
+
+# Languages
+- English (Fluent)</pre>
+      </details>
+      <div class="row"><button class="primary" id="cvSave">Save CV</button><span class="status-msg" id="cvMsg" role="status"></span></div>
+    </div>
+    <div class="panel">
+      <h3>How the radar reads your CV</h3>
+      <div class="outline" id="cvPreview"><p class="muted">Save your CV outline to see it here.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="detailsH" id="details">
+    <div class="sec-head"><h2 id="detailsH">My details and letter</h2></div>
+    <form class="panel" id="detailsForm" novalidate>
+      <p class="help">These head every CV and cover letter. They stay in this browser.</p>
+      <div class="grid2">
+        <label for="d_name">Full name<input id="d_name" autocomplete="name"></label>
+        <label for="d_email">Email<input id="d_email" type="email" autocomplete="email"></label>
+        <label for="d_phone">Phone<input id="d_phone" type="tel" autocomplete="tel"></label>
+        <label for="d_linkedin">LinkedIn or portfolio<input id="d_linkedin" autocomplete="url"></label>
+        <label for="d_home">Home town<input id="d_home" autocomplete="address-level2"></label>
+      </div>
+      <fieldset>
+        <legend>Visa</legend>
+        <div class="check"><input type="radio" name="ws" id="ws_permission" value="permission"><label for="ws_permission" style="font-weight:400">I can work in the UK now but will need sponsorship</label></div>
+        <div class="check"><input type="radio" name="ws" id="ws_sponsorship" value="sponsorship"><label for="ws_sponsorship" style="font-weight:400">I need sponsorship to start</label></div>
+        <p class="help">Your cover letters end with: <em id="wsSentence"></em></p>
+        <label class="check" for="d_relocate"><input type="checkbox" id="d_relocate"> I'm happy to relocate (letters for roles away from home say so)</label>
+      </fieldset>
+      <details>
+        <summary class="small">Edit the cover letter template</summary>
+        <div style="display:grid; gap:8px; margin-top:8px">
+          <p class="help">Placeholders are filled from the advert and your CV: {role} {company} {location} {degree} {skills} {skills_short} {job1_title} {job1_org} {job1_point} {job1_point2} {job2_org} {job2_point} {relocation} {sponsorship}. A sentence whose placeholder has nothing to fill is left out.</p>
+          <textarea id="d_template" class="code" rows="12"></textarea>
+          <div class="row"><button type="button" id="resetTemplate">Restore the default template</button></div>
+        </div>
+      </details>
+      <div class="row"><button class="primary" type="submit">Save details</button><span class="status-msg" id="detailsMsg" role="status"></span></div>
+    </form>
+  </section>
+
+  <section aria-labelledby="modelH" id="model">
+    <div class="sec-head"><h2 id="modelH">How the ranking works</h2></div>
+    <div class="panel" id="modelBody"></div>
+  </section>
+
+  <section aria-labelledby="dataH" id="data">
+    <div class="sec-head"><h2 id="dataH">Your data</h2></div>
+    <div class="panel">
+      <p class="small">Your CV, details, statuses and edited documents are stored in this browser only. Back them up to move them to another device or keep them safe.</p>
+      <div class="row">
+        <button id="backupBtn">Back up (download a file)</button>
+        <label class="btn" for="restoreFile">Restore from a backup<input type="file" id="restoreFile" accept=".json,application/json" class="sr-only"></label>
+        <button id="clearBtn" class="quiet">Clear everything in this browser</button>
+      </div>
+      <div id="clearConfirm" class="row" hidden>
+        <span class="small">This deletes your CV, details, statuses and edits from this browser.</span>
+        <button id="clearYes" class="primary">Delete them</button><button id="clearNo">Keep them</button>
+      </div>
+      <span class="status-msg" id="dataMsg" role="status"></span>
+    </div>
+  </section>
+
+  <footer>
+    <p id="footRun"></p>
+    <p>No AI is used. Listings come from <a href="https://www.adzuna.co.uk/" target="_blank" rel="noopener">Adzuna</a> and <a href="https://www.reed.co.uk/" target="_blank" rel="noopener">Reed.co.uk</a>, sponsors from the Home Office <a href="https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers" target="_blank" rel="noopener">register of licensed sponsors</a>. Rules filter them; machine learning ranks them.</p>
+    <p>Always confirm sponsorship and salary with the employer before applying. This is not immigration advice.</p>
+  </footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div style="min-width:0"><h2 id="dlgTitle"></h2><p class="muted small" id="dlgSub"></p></div>
+      <button id="dlgClose" aria-label="Close">Close</button>
+    </div>
+    <div class="dlg-body" id="dlgBody"></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

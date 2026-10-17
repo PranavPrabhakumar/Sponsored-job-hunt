@@ -1,0 +1,76 @@
+name: Sponsor Radar
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"     # every 2 hours, at 17 minutes past (UTC)
+  workflow_dispatch: {}          # "Run workflow" button in the Actions tab
+  push:
+    branches: [main]
+    paths: ["config.yml", "radar/**", "docs/**", "!docs/data/**", ".github/workflows/**"]
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sponsor-radar
+  cancel-in-progress: false
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Search for new roles
+        id: search
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          REED_API_KEY: ${{ secrets.REED_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -m radar
+
+      - name: Save results
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "sponsor-radar"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data docs/data
+          if git diff --cached --quiet; then
+            echo "Nothing new to save."
+          else
+            git commit -q -m "Radar run $(date -u +%Y-%m-%dT%H:%MZ)"
+            git pull -q --rebase --autostash
+            git push -q
+          fi
+
+      - name: Prepare the dashboard
+        if: ${{ !cancelled() }}
+        uses: actions/configure-pages@v6
+
+      - name: Upload the dashboard
+        if: ${{ !cancelled() }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+      - name: Publish the dashboard
+        if: ${{ !cancelled() }}
+        id: deploy
+        uses: actions/deploy-pages@v5

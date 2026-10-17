@@ -1,0 +1,40 @@
+ALEX MORGAN
+Leeds, UK | alex.morgan@example.com | 07700 900123 | linkedin.com/in/alex-morgan-demo
+
+PROFILE
+Data analyst with an MSc in Data Science and hands-on experience turning messy data into dashboards and decisions. Comfortable with SQL, Python and Power BI, and with explaining results to non-technical stakeholders.
+
+SKILLS
+Programming: Python (Pandas, NumPy, scikit-learn), SQL, R
+Visualisation: Power BI (DAX), Tableau, Excel (Power Query)
+Machine learning: Random Forest, XGBoost, logistic regression
+
+EXPERIENCE
+Data Analyst Intern                                   May 2025 – Jun 2025
+Northgate Insights, Remote
+• Designed 12 interactive Power BI dashboards used by 40 managers to track sales and stock
+• Cleaned and joined 2M-row datasets in Python and SQL, cutting report preparation time by
+  6 hours a week
+• Presented monthly findings to stakeholders across 3 teams
+
+Junior Analyst
+Leeds Community Trust, Leeds
+Jul 2022 – Jul 2023
+• Analysed data on 3,000+ residents to find service gaps, improving delivery efficiency by 15%
+• Built weekly and monthly reports for managers in 5 departments
+• Resolved 200+ client issues with colleagues across teams
+
+EDUCATION
+MSc Data Science (Distinction), University of Leeds          Oct 2023 – Sep 2024
+• Dissertation: predicting insurance claims with Random Forest and XGBoost
+• Modules: Machine Learning, Data Visualisation, Predictive Analytics
+BSc Mathematics, University of Hull                           2019 – 2022
+
+CERTIFICATIONS
+Business Analytics (KPMG) · Tableau (KPMG)
+
+LANGUAGES
+English (Fluent), Hindi (Native)
+
+INTERESTS
+Running, chess
