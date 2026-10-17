@@ -64,6 +64,19 @@ class Judge:
         except Exception:
             pass  # judge on the snippet instead
 
+    def still_valid(self, record):
+        """Re-check a role already on the dashboard against the current title rules and settings."""
+        title = record.get("title", "")
+        if rules.title_excluded(title, self.cfg.get("exclude_title_words")):
+            return False
+        target, rel = self.clf.classify(title)
+        if not target or rel < float(self.cfg.get("min_title_match", 0.45)):
+            return False
+        named = re.match(r"^(.*) \(via .+\)$", record.get("company", ""))
+        if named and self.skills.find(named.group(1)):
+            return False
+        return True
+
     def judge(self, job):
         """Return (record, None) when kept, or (None, reason) when rejected.
         Returns (None, None) when the listing can't be judged yet (try again next run)."""
@@ -84,7 +97,7 @@ class Judge:
         via = None
         if rules.is_agency(company):
             named = rules.employer_in_title(title)
-            if named and self.index and self.index.match(named).kind != "none":
+            if named and not self.skills.find(named) and self.index and self.index.match(named).kind != "none":
                 via, company = company, named
                 job["company"] = f"{named} (via {via})"
         match = self.index.match(company).as_dict() if self.index else {"match": "unknown"}
@@ -228,6 +241,10 @@ def run(root=".", env=None, now=None, session=None, sleep=True, notify_on=True):
     judge = Judge(cfg, index, TargetClassifier(cfg.get("targets")), SkillExtractor(root / "docs/skills.json"),
                   session, env, today, now, sleep)
     rejected, new_records, checked = Counter(), [], 0
+    dropped = [i for i, rec in by_id.items() if not judge.still_valid(rec)]
+    for i in dropped:
+        by_key.pop(by_id[i].get("key") or dedupe_key(by_id[i]), None)
+        del by_id[i]
 
     unique = {}
     for job in az.jobs + rd.jobs:
@@ -298,7 +315,8 @@ def run(root=".", env=None, now=None, session=None, sleep=True, notify_on=True):
     meta["sources"]["adzuna"] = az.status()
     meta["sources"]["reed"] = rd.status()
     meta["sources"]["reed"]["detail_calls"] = judge.details_calls
-    meta["counts"] = {"checked": checked, "kept": len(new_records), "rejected": sum(rejected.values()), "showing": len(final)}
+    meta["counts"] = {"checked": checked, "kept": len(new_records), "rejected": sum(rejected.values()), "showing": len(final),
+                      "removed_by_new_rules": len(dropped)}
     meta["rejected"] = dict(rejected.most_common())
     meta["dashboard"] = notify.dashboard_url(repo)
     history = state.setdefault("history", [])

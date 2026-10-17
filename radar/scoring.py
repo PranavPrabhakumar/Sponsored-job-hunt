@@ -123,9 +123,13 @@ def sponsor_evidence(match: dict, mention: str | None):
         reasons.append(f'Advert mentions sponsorship ("{mention.strip()[:80]}")')
     kind = (match or {}).get("match", "none")
     rating = (match or {}).get("rating", "")
-    if kind in ("exact", "prefix"):
+    if kind == "exact":
         score += 0.4 if rating == "A" else 0.25
         reasons.append(f"Licensed Skilled Worker sponsor: {match.get('register_name')}" + (f" ({rating}-rated)" if rating else ""))
+    elif kind == "prefix":
+        score += 0.4 if rating == "A" else 0.25
+        reasons.append(f"Name matches the licensed sponsor {match.get('register_name')}" + (f" ({rating}-rated)" if rating else "")
+                       + ": check it's the same organisation")
     elif kind == "similar":
         score += 0.2
         reasons.append(f"Probably on the sponsor register as {match.get('register_name')} (name match {match.get('similarity', 0):.0%})")

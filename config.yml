@@ -36,7 +36,8 @@ show_possible_sponsors: true   # also keep roles where the sponsor licence match
 # Words that rule a title out (lower case).
 exclude_title_words: [senior, sr, lead, principal, head, manager, director, staff, chief, vp, "vice president",
   architect, engineer, "data entry", "data protection", apprentice, apprenticeship, intern, internship,
-  placement, teacher, lecturer, "part time", "part-time", phd, postdoc, contractor]
+  placement, teacher, lecturer, "part time", "part-time", phd, postdoc, contractor,
+  avp, "assistant vice president", qa, tester, testing, "business analyst"]
 
 # Reject a role when the ad says one of these is required (lower case).
 reject_if_required: [acca, cima, cfa, frm, "actuarial exams", dbt, snowflake, "sap successfactors", sits]

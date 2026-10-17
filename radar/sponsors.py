@@ -24,7 +24,7 @@ CSV_RE = re.compile(r"https://assets\.publishing\.service\.gov\.uk/[^\s\"'<>]+?\
 
 DROP_WORDS = {
     "ltd", "limited", "plc", "llp", "llc", "lp", "inc", "incorporated", "co", "company", "corp",
-    "corporation", "uk", "gb", "the", "and", "group", "holdings", "holding", "of", "international",
+    "corporation", "uk", "gb", "the", "and", "group", "holdings", "holding", "of",
     "services", "service", "trading", "t", "a", "ta",
 }
 GENERIC = {

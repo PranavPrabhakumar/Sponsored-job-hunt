@@ -64,6 +64,7 @@ REGISTER_ROWS = [
     ("Hays Specialist Recruitment Limited", "London", "", "Worker (A rating)", "Skilled Worker"),
     ("Border to Coast Pensions Partnership Limited", "Leeds", "", "Worker (A rating)", "Skilled Worker"),
     ("eFinancialCareers Ltd", "London", "", "Worker (A rating)", "Skilled Worker"),
+    ("International Power Ltd.", "London", "", "Worker (A rating)", "Skilled Worker"),
 ]
 
 
@@ -130,6 +131,7 @@ REED_RESULTS = {
                  "Join our risk team. Excel and SQL. Visa sponsorship can be considered.", 40000, 45000),
         reed_job(9202, "Cyber Business Analyst", "eFinancialCareers", "London", "Business analysis for cyber.", 50000, 55000),
         reed_job(9203, "Risk Analyst", "Barclays Execution Services", "Glasgow", "Older advert", 40000, 42000, date="01/09/2026"),
+        reed_job(9204, "Management Reporting Risk Analyst - Power BI", "eFinancialCareers", "London", "Reporting.", 40000, 45000),
     ],
     "data scientist": [
         reed_job(9101, "Graduate Data Scientist", "Monzo Bank", "London",

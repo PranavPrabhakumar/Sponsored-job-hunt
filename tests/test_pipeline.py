@@ -131,6 +131,9 @@ class Rules(unittest.TestCase):
         self.assertIsNone(rules.employer_in_title("Data Analyst - London"))
         self.assertIsNone(rules.employer_in_title("Data Analyst - 12 month contract"))
         self.assertIsNone(rules.employer_in_title("Data Analyst"))
+        self.assertEqual(rules.title_excluded("QA Analyst Risk IT", CFG["exclude_title_words"]), "qa")
+        self.assertEqual(rules.title_excluded("Operational Risk Analyst AVP", CFG["exclude_title_words"]), "avp")
+        self.assertIsNone(rules.title_excluded("Business Intelligence Analyst", CFG["exclude_title_words"]))
         self.assertTrue(rules.is_agency("Hays"))
         self.assertTrue(rules.is_agency("Spectrum IT Recruitment Ltd"))
         self.assertFalse(rules.is_agency("Monzo Bank"))
@@ -246,6 +249,7 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(jobs["reed:9201"]["sponsor"]["register_name"], "Border to Coast Pensions Partnership Limited")
         self.assertNotIn("reed:9202", jobs)   # "Business Analyst" isn't one of the targets
         self.assertNotIn("reed:9203", jobs)   # posted more than 21 days ago
+        self.assertNotIn("reed:9204", jobs)   # "Power BI" in the title is a skill, not the employer
 
         # Rejected, for the right reasons
         for jid in ["adzuna:102", "adzuna:103", "adzuna:104", "adzuna:105", "adzuna:106", "adzuna:107",
@@ -257,7 +261,7 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(rej.get("asks for more experience"), 1)
         self.assertEqual(rej.get("short fixed-term contract"), 1)
         self.assertGreaterEqual(rej.get("employer not on the sponsor register", 0), 2)
-        self.assertEqual(rej.get("recruitment agency, employer not named"), 1)
+        self.assertEqual(rej.get("recruitment agency, employer not named"), 2)  # Hays, and the "Power BI" job-board advert
         self.assertEqual(rej.get("part-time"), 1)
         self.assertEqual(meta["counts"]["kept"], len(jobs))
         self.assertTrue(meta["sources"]["register"]["ok"])
@@ -280,6 +284,19 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(len(gh.comments), 1)
         details_calls = [c for c in sess2.calls if "/api/1.0/jobs/" in c[1]]
         self.assertEqual(details_calls, [])
+
+    def test_new_rules_remove_existing_roles(self):
+        run(self.dir, env=self.env, now=datetime(2026, 10, 17, 9, 17, tzinfo=UK), session=fakes.make_session(), sleep=False, notify_on=False)
+        before = {j["id"] for j in self.read("docs/data/jobs.json")["jobs"]}
+        self.assertIn("reed:9001", before)
+        cfg = yaml.safe_load((self.dir / "config.yml").read_text())
+        cfg["exclude_title_words"].append("credit")
+        (self.dir / "config.yml").write_text(yaml.safe_dump(cfg))
+        run(self.dir, env=self.env, now=datetime(2026, 10, 17, 11, 17, tzinfo=UK), session=fakes.make_session(adzuna={}, reed={}),
+            sleep=False, notify_on=False)
+        after = {j["id"] for j in self.read("docs/data/jobs.json")["jobs"]}
+        self.assertNotIn("reed:9001", after)
+        self.assertEqual(self.read("docs/data/meta.json")["counts"]["removed_by_new_rules"], 1)
 
     def test_quiet_hours_hold_then_morning(self):
         gh = fakes.GitHubFake()
