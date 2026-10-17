@@ -147,6 +147,92 @@ def settings_tests(browser, url):
     ctx.close()
 
 
+def cv_reader_tests(browser, url):
+    """The CV reader: headings that put the job title and organisation on one line, bullets, hyphens, older outlines."""
+    ctx, page, errs = new_page(browser, url)
+    outline = lambda text: page.evaluate("t => window.__radar.rawToOutline(t).outline", text)
+    parsed = lambda text: page.evaluate("t => window.__radar.parseOutline(t)", text)
+    job = "## Data Analytics Intern | Brightwave | Remote | 03/2025 – 05/2025"
+    cases = [
+        ("one line, dates after", "EXPERIENCE\nData Analytics Intern Brightwave (Remote) 03/2025 – 05/2025\n• Built dashboards\n", job),
+        ("one line, dates on the next line", "EXPERIENCE\nData Analytics Intern Brightwave (Remote)\n03/2025 – 05/2025\n• Built dashboards\n", job),
+        ("dates first", "EXPERIENCE\n03/2025 – 05/2025\nData Analytics Intern Brightwave (Remote)\n• Built dashboards\n", job),
+        ("tabs", "EXPERIENCE\nData Analytics Intern\tBrightwave (Remote)\t03/2025 – 05/2025\n• Built dashboards\n", job),
+        ("organisation first, separated", "EXPERIENCE\nBrightwave | Data Analytics Intern | Remote | 03/2025 – 05/2025\n• Built dashboards\n", job),
+        ("organisation on the next line", "EXPERIENCE\nData Analytics Intern 03/2025 – 05/2025\nBrightwave (Remote)\n• Built dashboards\n", job),
+        ("title in brackets kept, organisation after", "EXPERIENCE\nCustomer Service Assistant Tesco Stores Ltd (Part-time) 2021 – 2023\n• Served customers\n",
+         "## Customer Service Assistant (Part-time) | Tesco Stores Ltd | 2021 – 2023"),
+        ("head of", "EXPERIENCE\nHead of Data Brightwave 2021 – 2023\n• Led a team\n", "## Head of Data | Brightwave | 2021 – 2023"),
+        ("company name first", "EXPERIENCE\nLloyds Banking Group Data Analyst 2021 – 2023\n• Built reports\n", "## Data Analyst | Lloyds Banking Group | 2021 – 2023"),
+        ("a title alone stays a title", "EXPERIENCE\nPricing Analyst 2021 – 2023\n• Built models\n", "## Pricing Analyst | 2021 – 2023"),
+        ("a title with its field stays a title", "EXPERIENCE\nAssociate Director Finance 2021 – 2023\n• Led budgets\n", "## Associate Director Finance | 2021 – 2023"),
+        ("place on its own line", "EXPERIENCE\nData Analytics Intern 03/2025 – 05/2025\nBrightwave\nRemote\n• Built dashboards\n", job),
+        ("degree and university", "EDUCATION\nMSc Business Analytics (Merit) University of Leicester 2023 – 2024\n",
+         "## MSc Business Analytics (Merit) | University of Leicester | 2023 – 2024"),
+        ("degree and college", "EDUCATION\nBE Electronics and Communication Engineering PSG College of Technology 2018 – 2022\n",
+         "## BE Electronics and Communication Engineering | PSG College of Technology | 2018 – 2022"),
+        ("university first", "EDUCATION\nUniversity of Leicester | MSc Business Analytics | 2023 – 2024\n", "## MSc Business Analytics | University of Leicester | 2023 – 2024"),
+        ("named university", "EDUCATION\nMSc Data Science Queen Mary University of London 2023 – 2024\n", "## MSc Data Science | Queen Mary University of London | 2023 – 2024"),
+    ]
+    for name, text, want in cases:
+        got = outline(text)
+        check(f"CV reader: {name}", want + "\n" in got, got)
+    got = outline("PROFILE\nUsing statistical models on real-\nworld problems, with short- and long-term goals.\n")
+    check("CV reader: a word broken at a hyphen is joined", "on real-world problems, with short- and long-term goals." in got, got)
+    got = outline("EXPERIENCE\nData Analytics Intern, Brightwave 2024 – 2025\n Built dashboards\n Cleaned data\n")
+    check("CV reader: Word's Symbol bullets", "- Built dashboards\n- Cleaned data" in got, got)
+    got = outline("EXPERIENCE\nData Analytics Intern, Brightwave\t2024 – 2025\n• Built dashboards for 40 managers\n"
+                  "Business Analyst Intern Kestrel Data Solutions Pvt Ltd (Chennai, India)\n01/2023 – 06/2023\n• Built SQL reports\n")
+    check("CV reader: a long heading after a point starts the next job",
+          "- Built dashboards for 40 managers\n\n## Business Analyst Intern | Kestrel Data Solutions Pvt Ltd | Chennai, India | 01/2023 – 06/2023" in got, got)
+    got = outline("EXPERIENCE\nData Analytics Intern, Brightwave 2024 – 2025\n• Built dashboards for 40 managers, cutting\nreporting time by half\n• Cleaned data\n")
+    check("CV reader: a wrapped point is joined", "- Built dashboards for 40 managers, cutting reporting time by half\n- Cleaned data" in got, got)
+    got = outline("EXPERIENCE\nData Analytics Intern 2024 – 2025\nRemote\n• Built dashboards\n")
+    check("CV reader: a place without an organisation keeps its slot", "## Data Analytics Intern | | Remote | 2024 – 2025" in got, got)
+    check("CV reader: that outline reads back", parsed(got)["experience"][0]["org"] == "" and parsed(got)["experience"][0]["place"] == "Remote")
+
+    # Outlines saved by the earlier reader are repaired when read
+    cv = parsed("# Profile\nWorking on real- world problems.\n\n# Experience\n## Data Analytics Intern Brightwave (Remote) | 03/2025 – 05/2025\n- Built dashboards\n"
+                "## Business Analyst Intern Kestrel Data Solutions Pvt Ltd (Chennai, India | 01/2023 – 06/2023\n- Built reports\n\n"
+                "# Education\n## MSc Business Analytics (Merit) University of Leicester | 2023 – 2024\n")
+    e0, e1, d0 = cv["experience"][0], cv["experience"][1], cv["education"][0]
+    check("saved outline: one-line heading split", (e0["title"], e0["org"], e0["place"]) == ("Data Analytics Intern", "Brightwave", "Remote"), e0)
+    check("saved outline: unclosed bracket", (e1["title"], e1["org"], e1["place"]) == ("Business Analyst Intern", "Kestrel Data Solutions Pvt Ltd", "Chennai, India"), e1)
+    check("saved outline: degree and university split", (d0["degree"], d0["school"]) == ("MSc Business Analytics (Merit)", "University of Leicester"), d0)
+    check("saved outline: hyphen joined", cv["profile"] == "Working on real-world problems.", cv["profile"])
+
+    # The preview names the jobs that still need fixing
+    page.fill("#cvOutline", "# Experience\n## Data Analytics Intern Brightwave (Remote) | 03/2025 – 05/2025\n- Built dashboards\n## Freelance work | 2024\n- Built sites\n")
+    page.click("#cvSave")
+    prev = page.inner_text("#cvPreview")
+    check("preview: split heading shown as title · organisation", "Data Analytics Intern · Brightwave" in prev and "Remote · 03/2025 – 05/2025" in prev, prev[:300])
+    check("preview: names the job it can't split", "“Freelance work”" in prev and "## Job title | Organisation | Place | Dates" in prev and "organisation missing" in prev, prev[:400])
+    check("preview: no warning for the split job", "Data Analytics Intern Brightwave" not in prev, prev[:400])
+
+    # Uploads in common layouts
+    want = {
+        "layout-cv.pdf": True, "layout-cv.docx": True, "layout-cv-browser.pdf": True,
+    }
+    for name in want:
+        page.evaluate("document.getElementById('cvOutline').value = ''")
+        page.set_input_files("#cvFile", str(HERE / "fixtures" / name))
+        page.wait_for_function("document.getElementById('cvOutline').value.includes('## ')", timeout=20000)
+        out = page.input_value("#cvOutline")
+        ok = all(x in out for x in [
+            "## Data Analytics Intern | Brightwave | Remote | 03/2025 – 05/2025",
+            "- Interpreted sales datasets, delivering insights that informed pricing decisions\n- Designed and deployed 8 interactive dashboards in Power BI",
+            "## Business Analyst Intern | Kestrel Data Solutions Pvt Ltd | Chennai, India | 01/2023 – 06/2023",
+            "- Built weekly SQL reports for 4 teams\n- Automated data cleaning in Python, saving 5 hours a week",
+            "## MSc Business Analytics (Merit) | University of Leicester | 09/2023 – 09/2024",
+            "## BE Electronics and Communication Engineering | PSG College of Technology | 06/2018 – 05/2022",
+            "statistical models to real-world problems"])
+        check(f"upload {name}: titles, organisations, points and hyphens", ok, out[:700])
+    raw = page.input_value("#cvRaw")
+    check("upload: no blank line between every line", "\n\n\n" not in raw and raw.count("\n\n") <= 2, repr(raw[:200]))
+    check("CV reader: no errors", not errs, "; ".join(errs[:3]))
+    ctx.close()
+
+
 def main():
     tmp = Path(tempfile.mkdtemp())
     site = tmp / "site"
@@ -306,6 +392,9 @@ def main():
         check("Word upload builds an outline", "## Data Analyst Intern | Northgate Insights | Remote | May 2025 – Jun 2025" in out_docx and "- Designed 12 interactive" in out_docx, out_docx[:400])
         check("no errors on uploads", not errs, "; ".join(errs[:3]))
         ctx.close()
+
+        # 7b. The CV reader on common layouts
+        cv_reader_tests(browser, url)
 
         # 8. Phone width and dark mode
         ctx, page, errs = new_page(browser, url, width=375, scheme="dark", storage=st)

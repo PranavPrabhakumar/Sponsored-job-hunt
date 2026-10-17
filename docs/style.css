@@ -183,6 +183,12 @@ dialog::backdrop { background: rgb(5 20 18 / 0.55); }
 .outline { display: grid; gap: 10px; font-size: 0.9rem; }
 .outline h4 { margin: 0; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .outline ul { margin: 2px 0 0; padding-left: 18px; }
+.outline .cv-entry { display: grid; gap: 2px; }
+.outline .cv-entry + .cv-entry { margin-top: 8px; }
+.outline .cv-head, .outline .cv-meta { margin: 0; }
+.outline .cv-meta { font-size: 0.82rem; color: var(--muted); }
+.outline .missing { color: var(--bad); font-weight: 700; }
+.notice code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
 pre.guide { margin: 0; white-space: pre-wrap; font-family: var(--font-mono); font-size: 0.8rem; background: var(--sunk); border-radius: 8px; padding: 10px 12px; color: var(--fg); }
 
 /* Model */

@@ -172,7 +172,10 @@ const MONTH = "(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|jul
 const DATE1 = `(?:${MONTH}\\.?,?\\s*)?(?:19|20)\\d{2}|\\d{1,2}\\/(?:19|20)\\d{2}`;
 const RANGE_RE = new RegExp(`(${DATE1})\\s*(?:–|—|-|to|until)\\s*(${DATE1}|present|current|now|date|ongoing)`, "i");
 const YEAR_RE = new RegExp(`\\b(?:${MONTH}\\.?\\s*)?(?:19|20)\\d{2}\\b`, "i");
-const BULLET_RE = /^\s*(?:[•▪●◦‣∙·*–—-]|\d{1,2}[.)])\s+/;
+// Bullet signs, including the private-use characters that Word's Symbol and Wingdings bullets become in PDFs ("")
+const BULLET_CHARS = "•▪●◦‣∙·*–—■□◆◇❖➢►▸✓✔⁃○\\uE000-\\uF8FF-";
+const BULLET_RE = new RegExp(`^\\s*(?:[${BULLET_CHARS}]|\\d{1,2}[.)])\\s+`);
+const LONE_BULLET_RE = /^[•▪●◦‣∙·*■□◆◇❖➢►▸✓✔⁃○\uE000-\uF8FF]$/;
 const looksLikeDates = (s) => RANGE_RE.test(s) || /^\s*(?:\(?\s*)?(?:(?:19|20)\d{2}|present)\s*\)?\s*$/i.test(s) || (YEAR_RE.test(s) && s.replace(YEAR_RE, "").replace(/[^a-z]/gi, "").length <= 3);
 
 function splitItems(s, seps = ",;|•·") {
@@ -186,6 +189,273 @@ function splitItems(s, seps = ",;|•·") {
   if (cur.trim()) out.push(cur.trim());
   return out;
 }
+
+// --- Reading job and education headings without AI: word lists and rules.
+// "Data Analyst Intern Brightwave (Remote)" → title "Data Analyst Intern", organisation "Brightwave", place "Remote".
+const wordSet = (s) => new Set(s.trim().split(/\s+/));
+const ROLE_NOUNS = wordSet(`intern internship trainee apprentice apprenticeship volunteer fellow analyst scientist engineer developer programmer
+  architect designer researcher statistician economist actuary mathematician modeller modeler manager director head lead leader supervisor
+  coordinator co-ordinator administrator officer executive assistant associate consultant advisor adviser specialist strategist planner
+  accountant auditor bookkeeper controller underwriter broker banker trader technician tester operator operative clerk cashier receptionist
+  secretary tutor teacher lecturer instructor demonstrator mentor coach trainer representative rep agent ambassador member crew staff worker
+  barista server waiter waitress host chef cook baker bartender carer nurse pharmacist therapist practitioner driver courier porter cleaner
+  picker packer labourer handler steward attendant writer editor journalist producer founder co-founder cofounder owner partner president
+  chair chairperson treasurer captain recruiter buyer merchandiser marketer expert inspector surveyor paralegal solicitor lawyer`);
+const TITLE_WORDS = wordSet(`junior jnr senior snr sr graduate grad trainee entry entry-level level principal chief deputy vice acting interim
+  assistant associate data business research marketing sales operations ops product project projects programme program software financial
+  finance risk credit fraud insight insights analytics analytical reporting customer client service support technical digital quantitative
+  quant investment commercial strategy strategic machine learning ml ai cloud systems system database information health clinical account
+  accounts audit tax payroll procurement supply chain logistics store retail team shift office administrative admin teaching summer virtual
+  student volunteer voluntary part-time full-time temporary contract freelance visiting global regional area national branch front desk help
+  field lab laboratory quality compliance regulatory governance security cyber network web frontend front-end backend back-end full-stack
+  fullstack stack full devops implementation delivery change transformation process improvement planning forecasting pricing actuarial
+  underwriting claims treasury payments lending mortgage insurance energy policy economic statistical survey market media content creative
+  brand growth revenue performance people talent recruitment hr it bi mi qa ux ui gis crm seo ppc esg aml kyc sql etl python power general
+  executive personal science computer computing engineering mechanical electrical civil sustainability environmental banking trading equity
+  portfolio asset wealth private corporate legal medical care social community events event communications communication pr public relations
+  partnerships hospitality kitchen warehouse distribution transport facilities maintenance helpdesk english maths math night weekend library`);
+const CONNECTORS = wordSet("of and & for to the in with / - – —");
+const TITLE_ACRONYMS = wordSet(`bi mi hr it qa ux ui ai ml nlp sql etl gis esg aml kyc crm seo ppc sem ap ar pa ea vp avp svp evp cfo cto ceo coo
+  cmo cio cdo cro pmo rpa sap erp dba cx gtm sre ios sme csr ehs hse pr ii iii iv`);
+const ORG_FORMS = wordSet("ltd limited plc llp llc inc incorporated corp corporation pvt gmbh pte pty group holdings bank university council nhs");
+const INSTITUTION_WORDS = wordSet(`university universiteit universidad college institute institution school academy polytechnic conservatoire iit
+  iiit nit iim vidyalaya vidyalayam vidyapeeth vidyapeetham vishwavidyalaya mahavidyalaya`);
+const DEGREE_ABBR = wordSet(`bsc msc beng meng btech mtech bcom mcom bba mba bca mca phd dphil mphil mres llb llm mbbs bds bpharm mpharm barch
+  pgdip pgdipl pgcert pgce hnd hnc btec gcse gcses a-level a-levels alevel alevels ib hsc ssc cbse icse isc sslc puc bachelor bachelors
+  bachelor's bachelor’s master masters master's master’s diploma doctorate`);
+const DEGREE_SHORT = wordSet("ba ma bs ms be me");
+const DEGREE_WEAK = wordSet(`certificate foundation higher highers secondary senior class xii x xth xiith 12th 10th intermediate matriculation
+  degree hons honours level levels board`);
+const SUBJECT_WORDS = wordSet(`science sciences data applied computer computing engineering technology mathematics maths math statistics
+  economics finance financial business management administration analytics accounting accountancy physics chemistry biology biochemistry
+  psychology sociology law history geography english literature arts art design architecture medicine nursing pharmacy education studies
+  information systems electronics electrical mechanical civil chemical aerospace software artificial intelligence machine learning cyber
+  security digital marketing media communication communications international relations politics philosophy languages commerce banking
+  actuarial operational research operations quantitative health policy environmental energy bioinformatics biotechnology instrumentation
+  telecommunication telecommunications mechatronics automobile production industrial textile agriculture with and & in of hons honours`);
+const KNOWN_PLACES = new Set(`uk|u.k|united kingdom|great britain|britain|england|scotland|wales|northern ireland|london|greater london|city of london|
+  canary wharf|manchester|greater manchester|birmingham|leeds|liverpool|glasgow|edinburgh|bristol|sheffield|newcastle|newcastle upon tyne|
+  nottingham|leicester|coventry|cardiff|swansea|newport|belfast|aberdeen|dundee|inverness|stirling|york|bath|oxford|cambridge|brighton|reading|
+  southampton|portsmouth|bournemouth|poole|norwich|ipswich|colchester|chelmsford|exeter|plymouth|hull|bradford|wakefield|huddersfield|halifax|
+  harrogate|doncaster|rotherham|barnsley|middlesbrough|sunderland|durham|darlington|preston|blackpool|lancaster|bolton|wigan|warrington|stockport|
+  salford|chester|crewe|stoke|stoke-on-trent|derby|lincoln|peterborough|northampton|milton keynes|luton|bedford|watford|hatfield|st albans|
+  stevenage|welwyn garden city|hemel hempstead|hertford|slough|maidenhead|windsor|wokingham|bracknell|basingstoke|winchester|guildford|woking|
+  crawley|croydon|kingston|richmond|wembley|harrow|ealing|stratford|uxbridge|swindon|cheltenham|gloucester|worcester|hereford|telford|shrewsbury|
+  wolverhampton|walsall|solihull|warwick|leamington spa|canterbury|maidstone|chatham|dartford|southend|southend-on-sea|basildon|carlisle|kendal|
+  hertfordshire|bedfordshire|buckinghamshire|berkshire|surrey|kent|essex|sussex|east sussex|west sussex|hampshire|dorset|devon|cornwall|somerset|
+  wiltshire|oxfordshire|gloucestershire|middlesex|yorkshire|west yorkshire|south yorkshire|north yorkshire|lancashire|cheshire|merseyside|
+  tyne and wear|west midlands|east midlands|midlands|cumbria|norfolk|suffolk|lincolnshire|nottinghamshire|derbyshire|leicestershire|staffordshire|
+  warwickshire|northamptonshire|cambridgeshire|india|chennai|madras|mumbai|bombay|bangalore|bengaluru|hyderabad|secunderabad|pune|delhi|new delhi|
+  ncr|noida|greater noida|gurgaon|gurugram|faridabad|ghaziabad|kolkata|calcutta|kochi|cochin|ernakulam|coimbatore|madurai|trichy|tiruchirappalli|
+  salem|erode|tirunelveli|vellore|tiruppur|thanjavur|pondicherry|puducherry|thiruvananthapuram|trivandrum|kozhikode|calicut|thrissur|kollam|mysore|
+  mysuru|mangalore|mangaluru|hubli|belgaum|ahmedabad|surat|vadodara|baroda|rajkot|jaipur|udaipur|jodhpur|chandigarh|mohali|ludhiana|amritsar|
+  lucknow|kanpur|varanasi|prayagraj|allahabad|indore|bhopal|nagpur|nashik|aurangabad|thane|navi mumbai|visakhapatnam|vizag|vijayawada|guntur|
+  warangal|tirupati|bhubaneswar|cuttack|patna|ranchi|jamshedpur|guwahati|dehradun|shimla|srinagar|jammu|goa|panaji|tamil nadu|kerala|karnataka|
+  maharashtra|telangana|andhra pradesh|gujarat|rajasthan|punjab|haryana|uttar pradesh|west bengal|odisha|bihar|madhya pradesh|assam|usa|u.s.a|us|
+  united states|america|new york|san francisco|seattle|boston|chicago|canada|toronto|vancouver|ireland|dublin|cork|germany|berlin|munich|france|
+  paris|netherlands|amsterdam|spain|madrid|barcelona|italy|milan|rome|portugal|lisbon|switzerland|zurich|geneva|belgium|brussels|poland|warsaw|
+  sweden|stockholm|norway|oslo|denmark|copenhagen|finland|helsinki|uae|united arab emirates|dubai|abu dhabi|qatar|doha|saudi arabia|riyadh|
+  singapore|malaysia|kuala lumpur|hong kong|china|shanghai|beijing|japan|tokyo|australia|sydney|melbourne|new zealand|auckland|sri lanka|colombo|
+  pakistan|lahore|karachi|islamabad|bangladesh|dhaka|nepal|kathmandu|nigeria|lagos|abuja|kenya|nairobi|ghana|accra|south africa|cape town|
+  johannesburg|egypt|cairo|philippines|manila|vietnam|indonesia|jakarta|thailand|bangkok`.split("|").map((x) => x.trim()));
+const WORK_MODE_RE = /^(?:fully[ -]|partly[ -])?(?:remote(?:ly)?|hybrid|on[- ]?site|in[- ]office|in[- ]person|office[- ]based|home[- ]based|work(?:ing)? from home|wfh)\b/i;
+const GRADE_RE = /^(?:distinction|merit|pass|first(?: class)?(?: honours)?|1st|2[:.]1|2[:.]2|upper second|lower second|third|hons|honours|with honours|cum laude|c?gpa\b|\d+(?:\.\d+)?\s*(?:\/\s*\d+(?:\.\d+)?|%|c?gpa\b))/i;
+const EMPLOYMENT_RE = /^(?:full[- ]time|part[- ]time|contract|fixed[- ]term|temporary|temp|freelance|internship|placement|sandwich|summer|seasonal|volunteer(?:ing)?|voluntary|apprenticeship|work experience|graduate scheme|maternity cover)\b/i;
+
+function headTokens(s) {   // words, with "(...)" kept together as one token
+  const out = []; let cur = "", depth = 0;
+  for (const ch of str(s)) {
+    if (ch === "(" || ch === "[") { if (!depth && cur.trim()) { out.push(cur.trim()); cur = ""; } depth++; cur += ch; continue; }
+    if ((ch === ")" || ch === "]") && depth) { depth--; cur += ch; if (!depth) { out.push(cur.trim()); cur = ""; } continue; }
+    if (!depth && /\s/.test(ch)) { if (cur.trim()) out.push(cur.trim()); cur = ""; continue; }
+    cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+const isParen = (t) => /^[(\[].*[)\]]$/.test(t);
+const parenInner = (t) => t.slice(1, -1).trim();
+const tokKey = (t) => fold(t).replace(/^[^a-z0-9&]+|[^a-z0-9&+#]+$/g, "").replace(/\./g, "");
+const isRoleTok = (t) => !isParen(t) && ROLE_NOUNS.has(tokKey(t));
+const hasRole = (s) => headTokens(s).some(isRoleTok);
+const isDegreeTok = (t) => {
+  if (isParen(t)) return false;
+  const k = tokKey(t);
+  return DEGREE_ABBR.has(k) || (DEGREE_SHORT.has(k) && /^[A-Z][A-Z.]*$/.test(t.replace(/[,;:]$/, "")));
+};
+const hasDegree = (s) => headTokens(s).some(isDegreeTok) || /\bA[- ]?levels?\b|\bGCSEs?\b|\bclass (?:x|xii|10|12)\b|\b(?:10|12)th\b/i.test(str(s));
+const hasInstitution = (s) => headTokens(s).some((t) => !isParen(t) && INSTITUTION_WORDS.has(tokKey(t)));
+function placeLike(s) {
+  const t = str(s).trim();
+  if (!t || t.length > 50) return false;
+  if (WORK_MODE_RE.test(t)) return true;
+  const parts = t.split(/\s*[,/]\s*|\s+[-–—]\s+/).filter(Boolean);
+  const known = (p) => KNOWN_PLACES.has(fold(p).replace(/\.$/, "").trim());
+  if (parts.length && parts.every((p) => known(p) || WORK_MODE_RE.test(p))) return true;
+  return parts.length >= 2 && known(parts[parts.length - 1]) && parts.every((p) => /^[A-Z][A-Za-z .'-]*$/.test(p));
+}
+function trimSeps(s) {   // trim separators and stray brackets, keep balanced ones: "Brightwave (Remote)" stays whole
+  let t = str(s).replace(/\(\s*[,;|–—-]?\s*\)|\[\s*\]/g, " ").replace(/[ ]{2,}/g, " "), prev;
+  const count = (x, c) => x.split(c).length - 1;
+  do {
+    prev = t;
+    t = t.replace(/^[\s,;:|•·–—-]+|[\s,;:|•·–—-]+$/g, "");
+    if (t.endsWith("(") || t.endsWith("[")) t = t.slice(0, -1);
+    if (t.startsWith(")") || t.startsWith("]")) t = t.slice(1);
+    if (t.endsWith(")") && count(t, "(") < count(t, ")")) t = t.slice(0, -1);
+    if (t.startsWith("(") && count(t, "(") > count(t, ")")) t = t.slice(1);
+  } while (t !== prev);
+  return t.trim();
+}
+const SEP_RE = /\t+|\s*[|•·]\s*|\s+[–—]\s+|\s+-\s+|,\s+(?=[A-Z])|\s+(?:at|@)\s+/g;
+function splitSeps(s) {   // split on separators outside brackets
+  const keep = [];
+  const masked = str(s).replace(/\([^()]*\)|\[[^[\]]*\]/g, (m) => { keep.push(m); return `\u0001${keep.length - 1}\u0002`; });
+  return masked.split(SEP_RE).map((x) => trimSeps(x.replace(/\u0001(\d+)\u0002/g, (m, i) => keep[+i]))).filter(Boolean);
+}
+const joinPlaces = (...xs) => {
+  const out = [];
+  for (const p of xs.flatMap((x) => str(x).split(/\s*,\s*/))) if (p && !out.some((o) => fold(o) === fold(p))) out.push(p);
+  return out.join(", ");
+};
+const joinWrapped = (a, b) => {   // join a line broken mid-paragraph; "real-" + "world" → "real-world"
+  a = str(a); b = str(b);
+  if (!a || !b) return a || b;
+  if (/[A-Za-z]-$/.test(a) && /^[a-z]/.test(b) && !/^(?:and|or|nor|to)\s/.test(b)) return a + b;
+  return a + " " + b;
+};
+const fixHyphens = (s) => str(s).replace(/([A-Za-z]{2,})- (?!(?:and|or|nor|to|&)\s)(?=[a-z])/g, "$1-");
+
+// Split one heading's lines into its first part, second part and places
+function headingFields(texts) {
+  const rest = [], places = [];
+  for (const t of texts) for (let p of splitSeps(t)) {
+    p = trimSeps(p.replace(/\(([^()]*)\)/g, (m, inner) => (placeLike(inner) ? (places.push(inner.trim()), " ") : m)).replace(/\s{2,}/g, " "));
+    if (!p) continue;
+    if (rest.length && placeLike(p)) { places.push(p); continue; }
+    rest.push(p);
+  }
+  const [a = "", b = "", ...extra] = rest;
+  return { a, b, c: joinPlaces(...places, ...extra) };
+}
+
+const balanceParens = (s) => { const d = (str(s).match(/\(/g) || []).length - (str(s).match(/\)/g) || []).length; return d > 0 ? str(s) + ")".repeat(d) : str(s); };
+// "Data Analyst Intern Brightwave (Remote)" → { title, org, place }, or null when it can't tell
+function splitTitleOrg(text) {
+  text = balanceParens(text);
+  const parts = splitSeps(text);
+  if (parts.length >= 2) {
+    let [x, y, ...more] = parts;
+    if (!hasRole(x) && hasRole(y)) [x, y] = [y, x];
+    const yToks = headTokens(y);
+    if (!hasRole(x) || hasRole(y) || yToks.every((t) => TITLE_WORDS.has(tokKey(t)) || CONNECTORS.has(tokKey(t)))) return null;
+    return { title: x, org: y, place: joinPlaces(...more) };
+  }
+  const places = [], quals = [];
+  let ts = headTokens(text).filter((t) => {
+    if (isParen(t) && placeLike(parenInner(t))) { places.push(parenInner(t)); return false; }
+    if (isParen(t) && EMPLOYMENT_RE.test(parenInner(t))) { quals.push(t); return false; }
+    return true;
+  });
+  while (ts.length > 1 && !isParen(ts[ts.length - 1]) && WORK_MODE_RE.test(ts[ts.length - 1])) places.unshift(ts.pop());
+  const roles = ts.map((t, i) => (isRoleTok(t) ? i : -1)).filter((i) => i >= 0);
+  if (!roles.length) return null;
+  const r = roles[roles.length - 1];
+  const withQuals = (title) => [title, ...quals].join(" ");
+  if (r < ts.length - 1) {
+    // title first: the organisation follows the last role word
+    let j = r + 1;
+    while (j < ts.length) {
+      const t = ts[j], k = tokKey(t);
+      if (isParen(t)) {
+        const inner = parenInner(t);
+        const qualifier = j < ts.length - 1 || GRADE_RE.test(inner) || findSkills(inner).length || !/^[A-Z0-9]/.test(inner);
+        if (qualifier) { j++; continue; }
+        break;
+      }
+      if (/^(?:i{1,3}|iv|[1-4])$/.test(k)) { j++; continue; }   // "Engineer II"
+      if ((k === "of" || k === "for") && j + 1 < ts.length && TITLE_WORDS.has(tokKey(ts[j + 1]))) {   // "Head of Data"
+        j++;
+        while (j < ts.length && (TITLE_WORDS.has(tokKey(ts[j])) || ["and", "&"].includes(tokKey(ts[j])))) j++;
+        continue;
+      }
+      break;
+    }
+    let org = ts.slice(j);
+    while (org.length && /^(?:at|@|with|for|in|-|–|—)$/i.test(org[0])) org.shift();
+    if (org.length === 1 && isParen(org[0])) org = [parenInner(org[0])];   // "Data Analyst (Brightwave)"
+    const orgText = trimSeps(org.join(" "));
+    if (!orgText || !/^[A-Z0-9]/.test(orgText)) return null;
+    if (org.every((t) => TITLE_WORDS.has(tokKey(t)) || CONNECTORS.has(tokKey(t)))) return null;   // "Director Finance" is still a title
+    return { title: withQuals(ts.slice(0, j).join(" ")), org: orgText, place: places.join(", ") };
+  }
+  // organisation first ("Lloyds Banking Group Data Analyst"): only with a clear sign of a company name
+  let s = r;
+  while (s > 0) {
+    const k = tokKey(ts[s - 1]);
+    if (ROLE_NOUNS.has(k) || TITLE_WORDS.has(k) || CONNECTORS.has(k)) s--; else break;
+  }
+  while (s < r && CONNECTORS.has(tokKey(ts[s]))) s++;
+  if (s === 0) return null;
+  const org = ts.slice(0, s);
+  const sign = org.some((t) => ORG_FORMS.has(tokKey(t)) || (/^[A-Z&]{2,6}$/.test(t) && !TITLE_ACRONYMS.has(tokKey(t))));
+  if (!sign) return null;
+  return { title: withQuals(ts.slice(s).join(" ")), org: trimSeps(org.join(" ")), place: places.join(", ") };
+}
+
+// "MSc Data Science (Distinction) University of Leeds" → { degree, school, place }, or null
+function splitDegreeSchool(text) {
+  text = balanceParens(text);
+  const parts = splitSeps(text);
+  if (parts.length >= 2) {
+    const i = parts.findIndex((p) => hasInstitution(p) && !hasDegree(p));
+    if (i < 0) return null;
+    return { degree: parts.filter((p, k) => k !== i).join(", "), school: parts[i], place: "" };
+  }
+  const places = [];
+  const ts = headTokens(text).filter((t) => { if (isParen(t) && placeLike(parenInner(t))) { places.push(parenInner(t)); return false; } return true; });
+  const k = ts.findIndex((t) => !isParen(t) && INSTITUTION_WORDS.has(tokKey(t)));
+  if (k < 0) return null;
+  let s = k;
+  while (s > 0) {
+    const t = ts[s - 1], kk = tokKey(t);
+    if (isParen(t) || isDegreeTok(t) || DEGREE_WEAK.has(kk) || SUBJECT_WORDS.has(kk) || !/^[A-Z0-9&'’]/.test(t)) break;
+    s--;
+  }
+  let e = k + 1;
+  while (e < ts.length && !isDegreeTok(ts[e]) && !(isParen(ts[e]) && GRADE_RE.test(parenInner(ts[e])))) e++;
+  const degree = trimSeps([...ts.slice(0, s), ...ts.slice(e)].join(" "));
+  return { degree, school: trimSeps(ts.slice(s, e).join(" ")), place: places.join(", ") };
+}
+
+// Tidy a job: split "Title Organisation" headings and swap "Organisation | Title"
+function repairJob(e) {
+  if (!e.a && e.b && hasRole(e.b)) { e.a = e.b; e.b = ""; }
+  if (e.a && !e.b) {
+    const s = splitTitleOrg(e.a);
+    if (s) { e.a = s.title; e.b = s.org; e.c = joinPlaces(s.place, e.c); }
+  } else if (e.a && e.b && !hasRole(e.a) && hasRole(e.b)) [e.a, e.b] = [e.b, e.a];
+  return e;
+}
+function repairEdu(e) {
+  if (!e.a && e.b && hasDegree(e.b)) { e.a = e.b; e.b = ""; }
+  if (e.a && !e.b) {
+    const s = splitDegreeSchool(e.a);
+    if (s) { e.a = s.degree; e.b = s.school; e.c = joinPlaces(s.place, e.c); }
+  } else if (e.a && e.b && hasInstitution(e.a) && !hasDegree(e.a) && (hasDegree(e.b) || !hasInstitution(e.b))) [e.a, e.b] = [e.b, e.a];
+  return e;
+}
+// A line that reads like a heading rather than part of a sentence
+function headingLike(line) {
+  const t = str(line).replace(/\t/g, " ").trim();
+  if (!/^[(["']?[A-Z0-9]/.test(t) || /[.!?;:,]$/.test(t)) return false;
+  const words = t.split(/\s+/);
+  if (/\t/.test(line) || words.length <= 8) return true;
+  return words.length <= 16 && words.filter((w) => /^[(["']?[A-Z0-9&]/.test(w)).length / words.length >= 0.7;
+}
+// CV points start with a past-tense verb ("Designed", "Built"): a new point even without a bullet sign
+const verbStart = (line) => { const w = (str(line).match(/^[A-Z][a-z]+/) || [""])[0]; return /^[A-Z][a-z]{2,}ed$/.test(w) || IRREGULAR.has(w.toLowerCase()); };
+
 function parseOutline(text) {
   const cv = { profile: "", skills: [], experience: [], education: [], projects: [], certifications: [], languages: [] };
   let sec = null, cur = null;
@@ -201,14 +471,14 @@ function parseOutline(text) {
       let dates = "";
       if (parts.length > 1 && looksLikeDates(parts[parts.length - 1])) dates = parts.pop();
       if (sec === "projects") cur = { name: parts[0] || "", dates, bullets: [] };
-      else if (sec === "experience") cur = { title: parts[0] || "", org: parts[1] || "", place: parts.slice(2).join(", "), dates, bullets: [] };
-      else cur = { degree: parts[0] || "", school: parts[1] || "", place: parts.slice(2).join(", "), dates, bullets: [] };
+      else if (sec === "experience") cur = { title: parts[0] || "", org: parts[1] || "", place: parts.slice(2).filter(Boolean).join(", "), dates, bullets: [] };
+      else cur = { degree: parts[0] || "", school: parts[1] || "", place: parts.slice(2).filter(Boolean).join(", "), dates, bullets: [] };
       cv[sec].push(cur);
       continue;
     }
     const isBullet = BULLET_RE.test(line);
     const body = line.replace(BULLET_RE, "").trim();
-    if (sec === "profile") cv.profile = (cv.profile ? cv.profile + " " : "") + body;
+    if (sec === "profile") cv.profile = joinWrapped(cv.profile, body);
     else if (sec === "skills") {
       const mm = body.match(/^([^:]{2,40}):\s*(.+)$/);
       const items = splitItems(mm ? mm[2] : body);
@@ -223,15 +493,30 @@ function parseOutline(text) {
     } else if (["experience", "education", "projects"].includes(sec)) {
       if (!cur) { cur = sec === "projects" ? { name: "", dates: "", bullets: [] } : sec === "experience" ? { title: "", org: "", place: "", dates: "", bullets: [] } : { degree: "", school: "", place: "", dates: "", bullets: [] }; cv[sec].push(cur); }
       if (isBullet || !cur.bullets.length) cur.bullets.push(body);
-      else cur.bullets[cur.bullets.length - 1] += " " + body;
+      else cur.bullets[cur.bullets.length - 1] = joinWrapped(cur.bullets[cur.bullets.length - 1], body);
     }
   }
+  // Headings written as one line ("Data Analyst Intern Brightwave (Remote)") are split here, so older outlines read correctly too
+  for (const e of cv.experience) { const r = repairJob({ a: e.title, b: e.org, c: e.place }); Object.assign(e, { title: r.a, org: r.b, place: r.c }); }
+  for (const e of cv.education) { const r = repairEdu({ a: e.degree, b: e.school, c: e.place }); Object.assign(e, { degree: r.a, school: r.b, place: r.c }); }
+  cv.profile = fixHyphens(cv.profile);
+  for (const s of ["experience", "education", "projects"]) for (const e of cv[s]) e.bullets = e.bullets.map(fixHyphens);
   return cv;
 }
 function outlineHasContent(cv) { return !!(cv.experience.length || cv.education.length || cv.skills.length || cv.profile); }
 
+const cleanLine = (l) => str(l).replace(/^[ \t]*[-](?=[ \t]|$)/, "•").replace(/[   -  ]+/g, " ").replace(/ ?\t[ \t]*/g, "\t").trim();
+
 function rawToOutline(rawText) {
-  const lines = str(rawText).replace(/\r/g, "").split("\n").map((l) => l.replace(/\s+/g, " ").trim());
+  const lines = [];
+  let carry = false;
+  for (const raw of str(rawText).replace(/\r/g, "").split("\n")) {
+    const l = cleanLine(raw);
+    if (!l) continue;
+    if (LONE_BULLET_RE.test(l)) { carry = true; continue; }   // a bullet sign on its own line belongs to the next line
+    lines.push(carry ? "• " + l.replace(BULLET_RE, "") : l);
+    carry = false;
+  }
   const details = {};
   const head = [];
   const out = { profile: [], skills: [], experience: [], education: [], projects: [], certifications: [], languages: [] };
@@ -241,22 +526,25 @@ function rawToOutline(rawText) {
   const li = str(rawText).match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+\/?/i); if (li) details.linkedin = li[0].replace(/^https?:\/\/(www\.)?/i, "");
 
   const newEntry = (texts, dates) => {
-    const parts = texts.flatMap((t) => t.split(/\s*[|•·]\s*|\s+[–—]\s+|\s+-\s+|,\s+(?=[A-Z])|\s+at\s+/)).map((x) => x.trim()).filter(Boolean);
-    if (sec === "projects") cur = { name: parts.join(" – "), dates, bullets: [] };
-    else cur = { a: parts[0] || "", b: parts[1] || "", c: parts.slice(2).join(", "), dates, bullets: [] };
+    if (sec === "projects") cur = { name: texts.flatMap(splitSeps).join(" – "), dates, bullets: [] };
+    else { const f = headingFields(texts); cur = { a: f.a, b: f.b, c: f.c, dates, bullets: [] }; }
     out[sec].push(cur);
+  };
+  const addOrgLine = (line) => {   // the line under a title: "Brightwave (Remote)", "Northgate Insights, Remote"
+    const f = headingFields([line]);
+    cur.b = f.a;
+    cur.c = joinPlaces(cur.c, f.b, f.c);
   };
   const flushPending = () => {
     if (!pending.length) return;
     if (cur && cur.bullets.length) cur.bullets.push(...pending);
-    else if (cur && !cur.b && sec !== "projects") { const p = pending.join(", ").split(/,\s+/); cur.b = p[0]; cur.c = [cur.c, ...p.slice(1)].filter(Boolean).join(", "); }
+    else if (cur && !cur.b && sec !== "projects") addOrgLine(pending.join(", "));
     else newEntry(pending, "");
     pending = [];
   };
 
   for (const line of lines) {
-    if (!line) continue;
-    const plain = line.replace(/:$/, "");
+    const plain = line.replace(/:$/, "").replace(/\t+/g, " ");
     const s = plain.length <= 45 && !BULLET_RE.test(line) ? SECTION_OF(plain) : null;
     if (s && (plain === plain.toUpperCase() || plain.split(" ").length <= 4)) {
       if (["experience", "education", "projects"].includes(sec)) flushPending();
@@ -266,9 +554,9 @@ function rawToOutline(rawText) {
     if (!sec) { head.push(line); continue; }
     if (sec === "skip") continue;
     const isBullet = BULLET_RE.test(line);
-    const body = line.replace(BULLET_RE, "").trim();
+    const body = line.replace(BULLET_RE, "").replace(/\t+/g, " ").trim();
     if (sec === "profile") { out.profile.push(body); continue; }
-    if (sec === "skills") { out.skills.push(body); continue; }
+    if (sec === "skills") { out.skills.push(isBullet ? body : line.replace(/:\t+/g, ": ").replace(/\t+/g, ", ")); continue; }
     if (sec === "certifications" || sec === "languages") { out[sec].push(body); continue; }
     // experience / education / projects
     const range = line.match(RANGE_RE);
@@ -276,10 +564,10 @@ function rawToOutline(rawText) {
     if (!isBullet && (range || dateOnly || (sec !== "experience" && YEAR_RE.test(line) && line.length < 90))) {
       const m = range || line.match(YEAR_RE);
       const dates = m ? m[0].trim() : "";
-      const rest = line.replace(dates, "").replace(/[\s,|–—()-]+$/, "").replace(/^[\s,|–—()-]+/, "").trim();
+      const rest = trimSeps(line.replace(dates, "\t"));
       const texts = [...pending, rest].filter(Boolean);
       pending = [];
-      if (!texts.length && cur && !cur.dates) { cur.dates = dates; continue; }
+      if (!texts.length && cur && !cur.dates && !cur.bullets.length) { cur.dates = dates; continue; }
       newEntry(texts, dates);
       continue;
     }
@@ -292,25 +580,34 @@ function rawToOutline(rawText) {
       cur.bullets.push(body);
       continue;
     }
-    // a plain line: a wrapped bullet, or the start of the next entry
+    // a plain line: part of a point, a point without a bullet sign, the organisation or place, or the next heading
     const last = cur && cur.bullets.length ? cur.bullets[cur.bullets.length - 1] : null;
-    const titleLike = /^[A-Z]/.test(line) && line.split(" ").length <= 8 && !/[.!?]$/.test(line);
-    if (last != null && !pending.length && (/^[a-z0-9(&%£$,]/.test(line) || (!/[.!?]$/.test(last) && !titleLike))) {
-      cur.bullets[cur.bullets.length - 1] = last + " " + line;
-      continue;
+    const heady = headingLike(line), verb = verbStart(line);
+    if (last != null && !pending.length) {
+      if (/^[a-z0-9(&%£$,]/.test(line) || /[-,&/]$|\b(?:and|or|of|to|in|for|with|the|a|an|by|using)$/i.test(last) || (!/[.!?]$/.test(last) && !heady && !verb)) {
+        cur.bullets[cur.bullets.length - 1] = joinWrapped(last, body);
+        continue;
+      }
+      if (!heady || verb) { cur.bullets.push(body); continue; }
     }
-    if (cur && !cur.bullets.length && !cur.b && !pending.length && sec !== "projects") {
-      const p = line.split(/\s*[|•·]\s*|,\s+/); cur.b = p[0]; cur.c = [cur.c, ...p.slice(1)].filter(Boolean).join(", ");
-      continue;
+    if (cur && !cur.bullets.length && !pending.length) {
+      if (sec !== "projects" && heady && !verb) {
+        if (!cur.a && !cur.b) { const f = headingFields([line]); Object.assign(cur, { a: f.a, b: f.b, c: joinPlaces(cur.c, f.c) }); continue; }   // the dates came first
+        if (placeLike(line)) { cur.c = joinPlaces(cur.c, line); continue; }
+        if (!cur.b && line.split(/\s+/).length <= 10) { addOrgLine(line); continue; }
+      }
+      if (!heady || verb) { cur.bullets.push(body); continue; }
     }
     pending.push(line);
   }
   if (["experience", "education", "projects"].includes(sec)) flushPending();
+  for (const e of out.experience) repairJob(e);
+  for (const e of out.education) repairEdu(e);
 
   // name: the first short line of the header without contact details
-  const nameLine = head.find((l) => l.length <= 40 && !/[@\d]|linkedin|http/i.test(l) && l.split(" ").length <= 5);
+  const nameLine = head.find((l) => l.length <= 40 && !/[@\d\t]|linkedin|http/i.test(l) && l.split(" ").length <= 5);
   if (nameLine) details.name = nameLine.replace(/\b([a-z])/g, (c) => c.toUpperCase()).replace(/\b([A-Z])([A-Z]+)\b/g, (m, a, b) => a + b.toLowerCase());
-  const place = head.flatMap((l) => l.split(/\s*[|•·]\s*/)).find((p) => /^[A-Za-z .'-]+,\s*(UK|United Kingdom|England|Scotland|Wales|Northern Ireland)$/i.test(p));
+  const place = head.flatMap((l) => l.split(/\s*[|•·\t]\s*/)).find((p) => /^[A-Za-z .'-]+,\s*(UK|United Kingdom|England|Scotland|Wales|Northern Ireland)$/i.test(p));
   if (place) details.home = place.split(",")[0].trim();
   if (!out.profile.length) {
     const para = head.filter((l) => l !== nameLine && l.length > 80 && !/[@]|linkedin/i.test(l));
@@ -318,19 +615,21 @@ function rawToOutline(rawText) {
   }
 
   const L = [];
-  if (out.profile.length) L.push("# Profile", out.profile.join(" "), "");
+  if (out.profile.length) L.push("# Profile", fixHyphens(out.profile.reduce(joinWrapped, "")), "");
   if (out.skills.length) {
     L.push("# Skills");
     for (const s of out.skills) L.push(/^[^:]{2,40}:\s*\S/.test(s) ? s : splitItems(s, ";|•·").join(", "));
     L.push("");
   }
+  // "## Title | Organisation | Place | Dates"; an empty organisation keeps its place so the place isn't read as one
+  const fields = (e) => { const f = [e.a || ""]; if (e.b || e.c) f.push(e.b || ""); if (e.c) f.push(e.c); if (e.dates) f.push(e.dates); return f.join(" | ").replace(/\|\s+\|/g, "| |"); };
   const block = (name, list, fmt) => {
     if (!list.length) return;
     L.push("# " + name);
-    for (const e of list) { L.push("## " + fmt(e)); for (const b of e.bullets) L.push("- " + b); L.push(""); }
+    for (const e of list) { L.push("## " + fmt(e)); for (const b of e.bullets) L.push("- " + fixHyphens(b)); L.push(""); }
   };
-  block("Experience", out.experience, (e) => [e.a, e.b, e.c, e.dates].filter(Boolean).join(" | "));
-  block("Education", out.education, (e) => [e.a, e.b, e.c, e.dates].filter(Boolean).join(" | "));
+  block("Experience", out.experience, fields);
+  block("Education", out.education, fields);
   block("Projects", out.projects, (e) => [e.name, e.dates].filter(Boolean).join(" | "));
   if (out.certifications.length) { L.push("# Certifications", ...out.certifications.map((x) => "- " + x), ""); }
   if (out.languages.length) { L.push("# Languages", ...out.languages.map((x) => "- " + x), ""); }
@@ -698,18 +997,26 @@ function renderCvPreview() {
   const blocks = [];
   if (CV.profile) blocks.push(el("div", null, el("h4", null, "Profile"), el("p", null, CV.profile)));
   if (CV.skills.length) blocks.push(el("div", null, el("h4", null, "Skills"), el("ul", null, CV.skills.map((g) => el("li", null, el("strong", null, g.label + ": "), g.items.join(", "))))));
-  const ent = (title, list, a, b) => list.length && blocks.push(el("div", null, el("h4", null, title), list.map((e) => el("div", null,
-    el("strong", null, [e[a], b ? e[b] : ""].filter(Boolean).join(" · ") || "(no title)"), e.dates ? el("span", { class: "muted" }, " · " + e.dates) : null,
-    el("ul", null, e.bullets.map((x) => el("li", null, x)))))));
-  ent("Experience", CV.experience, "title", "org");
-  ent("Education", CV.education, "degree", "school");
-  ent("Projects", CV.projects, "name", null);
+  // Each entry: title · organisation, then place · dates, so a wrong split is easy to spot
+  const entry = (main, sub, missing, e) => el("div", { class: "cv-entry" },
+    el("p", { class: "cv-head" }, main ? el("strong", null, main) : el("strong", { class: "missing" }, "Job title missing"),
+      sub ? [" · ", sub] : missing ? [" · ", el("span", { class: "missing" }, missing)] : null),
+    e.place || e.dates ? el("p", { class: "cv-meta" }, [e.place, e.dates].filter(Boolean).join(" · ")) : null,
+    e.bullets.length ? el("ul", null, e.bullets.map((x) => el("li", null, x))) : null);
+  const group = (title, list, fn) => { if (list.length) blocks.push(el("div", null, el("h4", null, title), list.map(fn))); };
+  group("Experience", CV.experience, (e) => entry(e.title, e.org, "organisation missing", e));
+  group("Education", CV.education, (e) => entry(e.degree || e.school || "Qualification", e.degree ? e.school : "", null, e));
+  group("Projects", CV.projects, (e) => entry(e.name || "Project", "", null, e));
   if (CV.certifications.length) blocks.push(el("div", null, el("h4", null, "Certifications"), el("p", null, CV.certifications.join(" · "))));
   if (CV.languages.length) blocks.push(el("div", null, el("h4", null, "Languages"), el("p", null, CV.languages.join(" · "))));
   const warn = [];
-  if (!CV.experience.length) warn.push("No experience entries found: start each with a line like \"## Job title | Organisation | Place | Dates\".");
-  if (CV.experience.some((e) => !e.bullets.length)) warn.push("Some experience entries have no bullet points.");
-  if (CV.experience.some((e) => !e.title || !e.org)) warn.push("Some experience entries are missing a title or an organisation.");
+  const named = (list) => humanJoin(list.slice(0, 3).map((e) => `“${e.title || e.org || "untitled"}”`)) + (list.length > 3 ? ` and ${list.length - 3} more` : "");
+  if (!CV.experience.length) warn.push(["No jobs found. In the CV outline, start each job with a line like ", el("code", null, "## Job title | Organisation | Place | Dates"), "."]);
+  const unsplit = CV.experience.filter((e) => !e.title || !e.org);
+  if (unsplit.length) warn.push([`The radar couldn't tell the job title from the organisation in ${named(unsplit)}. In the CV outline, write ${unsplit.length === 1 ? "that line" : "those lines"} as `,
+    el("code", null, "## Job title | Organisation | Place | Dates"), ", for example ", el("code", null, "## Data Analyst | Acme Ltd | London | 05/2025 – 06/2025"), ", then press Save CV."]);
+  const bare = CV.experience.filter((e) => !e.bullets.length);
+  if (bare.length) warn.push([`No points under ${named(bare)}. Add them as lines starting with “- ” under the job.`]);
   box.replaceChildren(...warn.map((w) => el("p", { class: "notice warn" }, w)), ...blocks,
     el("p", { class: "small muted" }, `Skills recognised in your CV: ${[...CV_SKILLS].join(", ") || "none yet"}.`));
 }
@@ -1083,19 +1390,54 @@ async function pdfText(buf) {
   const pages = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const tc = await (await pdf.getPage(i)).getTextContent();
-    let lastY = null, lastEnd = null, line = "";
-    const lines = [];
+    // 1. Rows of text. A wide gap (a tab stop, or dates pushed to the right) becomes a tab, which keeps
+    //    "Data Analyst Intern<gap>Brightwave" apart.
+    const rows = [];
+    let row = null, lastEnd = null;
+    const flush = () => { if (row && row.text.trim()) rows.push(row); row = null; lastEnd = null; };
     for (const it of tc.items) {
-      const t = it.transform || [1, 0, 0, 1, 0, lastY || 0];
-      const y = Math.round(t[5]), x = t[4], h = Math.abs(t[3]) || 10;
-      if (lastY !== null && Math.abs(y - lastY) > 2) { lines.push(line); line = ""; lastEnd = null; }
-      if (line && lastEnd !== null && x - lastEnd > h * 0.15 && !line.endsWith(" ") && !String(it.str).startsWith(" ")) line += " ";
-      line += it.str || "";
-      lastEnd = x + (it.width || 0); lastY = y;
-      if (it.hasEOL) { lines.push(line); line = ""; lastEnd = null; }
+      const s = String(it.str || "");
+      const t = it.transform || [1, 0, 0, 1, 0, row ? row.y : 0];
+      const x = t[4], y = t[5], h = Math.abs(t[3]) || 10, w = it.width || 0;
+      if (s && row && Math.abs(y - row.y) > Math.max(2, Math.min(h, row.h) * 0.4)) flush();
+      if (s) {
+        if (!row) row = { text: "", x0: null, x1: null, y, h };
+        if (!s.trim()) {
+          if (row.text && w > h * 1.5) row.text = row.text.replace(/ +$/, "") + "\t";
+          else if (row.text && !/\s$/.test(row.text)) row.text += " ";
+        } else {
+          const gap = lastEnd === null ? 0 : x - lastEnd;
+          if (row.text && lastEnd !== null) {
+            if (gap > h * 1.5) row.text = row.text.replace(/ +$/, "") + "\t";
+            else if (gap > h * 0.15 && !/\s$/.test(row.text) && !/^\s/.test(s)) row.text += " ";
+          }
+          if (row.x0 === null) row.x0 = x;
+          const k = s.search(/[\p{L}\p{N}(£$]/u);
+          if (row.x1 === null && k >= 0) row.x1 = x + (s.length ? (w * k) / s.length : 0);
+          row.text += s;
+          row.h = Math.max(row.h, h);
+        }
+        lastEnd = x + w;
+      }
+      if (it.hasEOL) flush();
     }
-    if (line) lines.push(line);
-    pages.push(lines.map((l) => l.replace(/\s{2,}/g, " ").trim()).join("\n"));
+    flush();
+    // 2. A bullet point that wraps continues on lines that start where its text starts: join them.
+    const out = [];
+    for (const r of rows) {
+      r.text = r.text.replace(/ {2,}/g, " ").replace(/ *\t[ \t]*/g, "\t").trim();
+      r.bullet = BULLET_RE.test(r.text) || LONE_BULLET_RE.test(r.text.charAt(0));
+      const p = out[out.length - 1];
+      const dy = p ? p.y - r.y : 0;
+      if (p && p.inPoint && !r.bullet && r.x0 !== null && p.x1 !== null && Math.abs(r.x0 - p.x1) <= Math.max(2, r.h * 0.4)
+          && dy > 0 && dy <= Math.max(p.h, r.h) * 1.9 && !r.text.includes("\t") && !RANGE_RE.test(r.text)
+          && !(/[.!?]$/.test(p.text) && /^[A-Z]/.test(r.text))) {
+        p.text = joinWrapped(p.text, r.text); p.y = r.y;
+        continue;
+      }
+      out.push({ ...r, inPoint: r.bullet });
+    }
+    pages.push(out.map((r) => r.text).join("\n"));
   }
   return pages.join("\n\n");
 }
@@ -1104,20 +1446,75 @@ async function docxText(buf) {
   const zip = await JSZip.loadAsync(buf);
   const file = zip.file("word/document.xml");
   if (!file) throw new Error("That Word file has no document text");
-  const xml = await file.async("string");
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
   const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-  return [...doc.getElementsByTagNameNS(W, "p")].map((p) => {
-    const bullet = p.getElementsByTagNameNS(W, "numPr").length ? "• " : "";
-    let t = "";
-    for (const n of p.getElementsByTagNameNS("*", "*")) {
-      if (n.namespaceURI !== W) continue;
-      if (n.localName === "t") t += n.textContent;
-      else if (n.localName === "tab") t += " ";
-      else if (n.localName === "br") t += "\n";
+  const parse = async (f) => new DOMParser().parseFromString(await f.async("string"), "application/xml");
+  const val = (n) => (n ? n.getAttributeNS(W, "val") || n.getAttribute("w:val") || "" : "");
+  const child = (n, name) => (n ? [...n.childNodes].find((c) => c.localName === name) : undefined);
+  // Paragraph styles with list numbering (Word's "List Bullet" and the like) make their paragraphs bullet points
+  const listStyles = new Set();
+  const stylesFile = zip.file("word/styles.xml");
+  if (stylesFile) {
+    const sd = await parse(stylesFile);
+    const based = new Map(), numbered = new Set();
+    for (const st of sd.getElementsByTagNameNS(W, "style")) {
+      const id = st.getAttributeNS(W, "styleId") || st.getAttribute("w:styleId");
+      if (!id) continue;
+      const b = child(st, "basedOn"); if (b) based.set(id, val(b));
+      const np = st.getElementsByTagNameNS(W, "numPr")[0];
+      if (np && val(np.getElementsByTagNameNS(W, "numId")[0]) !== "0") numbered.add(id);
     }
-    return t.trim() ? bullet + t : "";
-  }).join("\n");
+    const isList = (id, d = 0) => !!id && d < 10 && (numbered.has(id) || isList(based.get(id), d + 1));
+    for (const id of [...based.keys(), ...numbered]) if (isList(id)) listStyles.add(id);
+  }
+  // Text of a paragraph: tabs stay tabs; tab-stop settings, deleted text and field codes are skipped
+  const SKIP = new Set(["pPr", "rPr", "sectPr", "txbxContent", "Fallback", "instrText", "delText", "del", "footnoteReference", "endnoteReference", "commentReference"]);
+  const runs = (node, out) => {
+    for (const n of node.childNodes) {
+      if (n.nodeType !== 1 || SKIP.has(n.localName)) continue;
+      if (n.namespaceURI === W) {
+        const ln = n.localName;
+        if (ln === "t") { out.push(n.textContent); continue; }
+        if (ln === "tab" || ln === "ptab") { out.push("\t"); continue; }
+        if (ln === "br" || ln === "cr") { out.push("\n"); continue; }
+        if (ln === "noBreakHyphen") { out.push("-"); continue; }
+        if (ln === "sym") { if (!out.join("").trim()) out.push("• "); continue; }
+      }
+      runs(n, out);
+    }
+  };
+  const paraText = (p) => {
+    const out = []; runs(p, out);
+    const t = out.join("");
+    if (!t.trim()) return "";
+    const ppr = child(p, "pPr");
+    const np = ppr && ppr.getElementsByTagNameNS(W, "numPr")[0];
+    const off = !!np && val(np.getElementsByTagNameNS(W, "numId")[0]) === "0";
+    const list = !off && (!!np || listStyles.has(val(child(ppr, "pStyle"))));
+    return (list && !BULLET_RE.test(t) ? "• " : "") + t;
+  };
+  const ownPara = (n) => { let q = n.parentNode; while (q && !(q.localName === "p" && q.namespaceURI === W)) { if (q.localName === "Fallback") return null; q = q.parentNode; } return q; };
+  const walk = (node, lines) => {
+    for (const n of node.childNodes) {
+      if (n.nodeType !== 1 || n.localName === "Fallback") continue;
+      if (n.namespaceURI === W && n.localName === "p") {
+        const t = paraText(n); if (t) lines.push(t);
+        for (const tb of n.getElementsByTagNameNS(W, "txbxContent")) if (ownPara(tb) === n) walk(tb, lines);   // text boxes
+        continue;
+      }
+      if (n.namespaceURI === W && n.localName === "tr") {   // a table row of one-line cells reads as one line: "Title<tab>Organisation<tab>Dates"
+        const cells = [...n.childNodes].filter((c) => c.localName === "tc").map((c) => { const ls = []; walk(c, ls); return ls; }).filter((c) => c.length);
+        if (cells.length > 1 && cells.every((c) => c.length === 1 && !BULLET_RE.test(c[0]) && !c[0].includes("\n"))) lines.push(cells.map((c) => c[0]).join("\t"));
+        else for (const c of cells) lines.push(...c);
+        continue;
+      }
+      walk(n, lines);
+    }
+  };
+  const lines = [];
+  for (const name of Object.keys(zip.files).filter((f) => /^word\/header\d*\.xml$/.test(f)).sort()) walk((await parse(zip.file(name))).documentElement, lines);
+  const doc = await parse(file);
+  walk(doc.getElementsByTagNameNS(W, "body")[0] || doc.documentElement, lines);
+  return lines.join("\n");
 }
 async function onCvFile(e) {
   const f = e.target.files && e.target.files[0]; if (!f) return;
@@ -1130,7 +1527,7 @@ async function onCvFile(e) {
     else if (name.endsWith(".docx")) text = await docxText(await f.arrayBuffer());
     else if (name.endsWith(".doc")) throw new Error("Old .doc files can't be read. Save it as .docx or PDF, or paste the text");
     else text = await f.text();
-    text = text.replace(/\r/g, "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    text = text.replace(/\r/g, "").replace(/^[ \t]*[\uE000-\uF8FF](?=[ \t]|$)/gm, "•").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
     if (!text) throw new Error("No text found. If it's a scanned PDF, paste the text instead");
     $("cvRaw").value = text;
     makeOutline();
