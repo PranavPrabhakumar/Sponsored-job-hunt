@@ -50,6 +50,10 @@ _KNOWN_AGENCIES = {
     "goodman masson", "morgan mckinley", "huxley", "sanderson", "computer futures", "progressive recruitment",
     "salt", "searchability", "nicholson glover", "pontoon", "tiro partners", "intec select", "datatech analytics",
     "eden smith", "client server", "opus recruitment solutions", "lorien", "hydrogen group", "cpl", "green park",
+    # job boards that post other employers' adverts
+    "efinancialcareers", "totaljobs", "cv library", "cwjobs", "jobsite", "indeed", "glassdoor", "linkedin",
+    "guardian jobs", "jobs ac uk", "monster", "adzuna", "gumtree", "jobserve", "nhs jobs", "milkround", "prospects",
+    "bright network", "gradcracker", "targetjobs", "civil service jobs",
 }
 _NUM = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
 _YEARS = re.compile(
@@ -93,6 +97,20 @@ def is_agency(company):
     name_clean = re.sub(r"[^a-z0-9 ]+", " ", name_clean)
     name_clean = re.sub(r"\s+", " ", name_clean).strip()
     return bool(_AGENCY_WORDS.search(name)) or name_clean in _KNOWN_AGENCIES
+
+
+def employer_in_title(title):
+    """Job boards often put the real employer after a dash: 'Risk Analyst - Border to Coast Pensions'."""
+    parts = re.split(r"\s+[-–|]\s+|\s+@\s+", str(title or ""))
+    if len(parts) < 2:
+        return None
+    cand = parts[-1].strip()
+    words = cand.split()
+    if not 1 <= len(words) <= 8 or not cand[:1].isupper():
+        return None
+    if re.search(r"(?i)\b(remote|hybrid|london|uk|united kingdom|england|scotland|wales|permanent|contract|full[- ]time|part[- ]time|graduate|junior|senior|£|\d)", cand):
+        return None
+    return cand
 
 
 def years_required(text):

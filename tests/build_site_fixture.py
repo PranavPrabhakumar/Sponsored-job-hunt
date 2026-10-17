@@ -85,6 +85,7 @@ def build(dest, extra=110, drop=None):
     tmp = Path(tempfile.mkdtemp())
     cfg = yaml.safe_load((ROOT / "config.yml").read_text())
     cfg["sources"]["adzuna"]["calls_per_run"] = 20
+    cfg["sources"]["adzuna"]["enabled"] = True
     (tmp / "config.yml").write_text(yaml.safe_dump(cfg))
     (tmp / "docs").mkdir()
     shutil.copy(ROOT / "docs/skills.json", tmp / "docs/skills.json")

@@ -71,7 +71,7 @@ class Judge:
         title = job.get("title", "")
         posted = parse_date(job.get("posted"))
         days_old = (self.today - posted).days if posted else None
-        if days_old is not None and days_old > int(cfg.get("max_days_old", 3)) + 1:
+        if days_old is not None and days_old > int(cfg.get("max_listing_age_days", 21)):
             return None, "older listing"
         word = rules.title_excluded(title, cfg.get("exclude_title_words"))
         if word:
@@ -80,7 +80,14 @@ class Judge:
         if not target or rel < float(cfg.get("min_title_match", 0.45)):
             return None, "title doesn't match your targets"
 
-        match = self.index.match(job.get("company", "")).as_dict() if self.index else {"match": "unknown"}
+        company = job.get("company", "")
+        via = None
+        if rules.is_agency(company):
+            named = rules.employer_in_title(title)
+            if named and self.index and self.index.match(named).kind != "none":
+                via, company = company, named
+                job["company"] = f"{named} (via {via})"
+        match = self.index.match(company).as_dict() if self.index else {"match": "unknown"}
         snippet = f"{title}\n{job.get('description', '')}"
         hint = rules.sponsorship_positive(snippet)
         self._maybe_details(job, worth_it=match.get("match") not in ("none",) or bool(hint))
@@ -89,7 +96,7 @@ class Judge:
         if rules.sponsorship_negative(text):
             return None, "advert says no sponsorship"
         mention = rules.sponsorship_positive(text)
-        agency = rules.is_agency(job.get("company", ""))
+        agency = rules.is_agency(company)
         if agency and not mention:
             return None, "recruitment agency, employer not named"
         if rules.needs_clearance(text):
@@ -137,6 +144,8 @@ class Judge:
             flags.append("Only a summary of the advert was checked: read it for any sponsorship wording")
         if agency:
             flags.append("Posted by a recruitment agency")
+        if via:
+            flags.append(f"Posted on {via}; the employer is named in the title")
         if years:
             flags.append(f"Asks for {years} year{'s' if years != 1 else ''} of experience")
 

@@ -25,7 +25,8 @@ targets:
 salary_rules_checked: 2026-10-17
 
 # Listings
-max_days_old: 3            # only listings posted in the last N days
+max_days_old: 3            # Adzuna: ask for listings posted in the last N days
+max_listing_age_days: 21   # skip listings older than this (each listing is only checked once)
 keep_days: 30              # how long a role stays on the dashboard after it's found
 max_years_experience: 2    # reject roles asking for more years than this (one more is allowed for junior/graduate titles)
 min_title_match: 0.45      # 0-1: how closely a job title must match one of your searches
@@ -56,5 +57,6 @@ sources:
   reed:
     enabled: true
     results_to_take: 100
+    pages_per_search: 2        # up to 200 results per search
     direct_employers_only: true
     max_details_per_run: 60

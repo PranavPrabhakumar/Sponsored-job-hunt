@@ -30,9 +30,23 @@ def clean_title(title: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+GENERIC_TITLE_WORDS = {"analyst", "scientist", "specialist", "officer", "executive", "consultant", "and", "of", "the", "a", "an", "uk"}
+
+
+def _singular(w):
+    return w[:-1] if len(w) > 3 and w.endswith("s") and not w.endswith("ss") else w
+
+
+def title_words(text):
+    return [_singular(w) for w in re.findall(r"[a-z0-9+]+", clean_title(text))]
+
+
 class TargetClassifier:
+    """Nearest-neighbour title classifier with a keyword gate: a title must contain the distinctive part
+    of one of a target's searches ("data", "risk", "business intelligence"...), not just "analyst"."""
+
     def __init__(self, targets):
-        self.labels, docs = [], []
+        self.labels, docs, self.gates = [], [], {}
         for t in targets or []:
             name = t.get("name") or "Target"
             for phrase in (t.get("searches") or []) + [name]:
@@ -40,6 +54,11 @@ class TargetClassifier:
                 if p:
                     self.labels.append(name)
                     docs.append(p)
+            keys = set()
+            for phrase in t.get("searches") or []:
+                key = " ".join(w for w in title_words(phrase) if w not in GENERIC_TITLE_WORDS)
+                keys.add(key)
+            self.gates[name] = keys
         self.ready = bool(docs)
         if not self.ready:
             return
@@ -55,9 +74,17 @@ class TargetClassifier:
         t = clean_title(title)
         if not t:
             return None, 0.0
+        words = " " + " ".join(title_words(title)) + " "
+        allowed = {name for name, keys in self.gates.items()
+                   if not keys or any(k == "" or f" {k} " in words for k in keys)}
+        if not allowed:
+            return None, 0.0
         sw = (self.Wd @ self.word.transform([t]).T).toarray().ravel()
         sc = (self.Wc @ self.char.transform([t]).T).toarray().ravel()
         sims = 0.5 * sw + 0.5 * sc
+        for i, label in enumerate(self.labels):
+            if label not in allowed:
+                sims[i] = 0.0
         i = int(np.argmax(sims))
         return self.labels[i], float(round(sims[i], 3))
 

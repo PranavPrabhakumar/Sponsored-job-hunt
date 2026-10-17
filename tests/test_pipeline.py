@@ -125,6 +125,12 @@ class Rules(unittest.TestCase):
         self.assertEqual(rules.title_excluded("Senior Data Analyst", CFG["exclude_title_words"]), "senior")
         self.assertEqual(rules.title_excluded("Data Analyst - Part Time", CFG["exclude_title_words"]), "part time")
         self.assertIsNone(rules.title_excluded("Junior Data Analyst", CFG["exclude_title_words"]))
+        self.assertTrue(rules.is_agency("eFinancialCareers"))
+        self.assertTrue(rules.is_agency("Totaljobs"))
+        self.assertEqual(rules.employer_in_title("Enterprise Risk Management Analyst - Border to Coast Pensions Partnership"), "Border to Coast Pensions Partnership")
+        self.assertIsNone(rules.employer_in_title("Data Analyst - London"))
+        self.assertIsNone(rules.employer_in_title("Data Analyst - 12 month contract"))
+        self.assertIsNone(rules.employer_in_title("Data Analyst"))
         self.assertTrue(rules.is_agency("Hays"))
         self.assertTrue(rules.is_agency("Spectrum IT Recruitment Ltd"))
         self.assertFalse(rules.is_agency("Monzo Bank"))
@@ -151,6 +157,12 @@ class Models(unittest.TestCase):
         self.assertEqual(clf.classify("BI & Reporting Analyst - London")[0], "Data & insight analyst")
         self.assertLess(clf.classify("Sales Assistant")[1], CFG["min_title_match"])
         self.assertGreaterEqual(clf.classify("Financial Crime Analyst")[1], CFG["min_title_match"])
+        # The gate: "analyst" alone isn't enough
+        for t in ["MES Business Analyst", "Cyber Business Analyst", "Business Analyst", "HR Analyst"]:
+            self.assertIsNone(clf.classify(t)[0], t)
+        self.assertEqual(clf.classify("Enterprise Risk Management Analyst - Border to Coast")[0], "Risk, credit & fraud analyst")
+        self.assertEqual(clf.classify("Business Intelligence Analyst")[0], "Data & insight analyst")
+        self.assertEqual(clf.classify("Customer Insights Analyst")[0], "Data & insight analyst")
 
     def test_skills(self):
         sk = SkillExtractor(ROOT / "docs/skills.json")
@@ -193,6 +205,7 @@ class EndToEnd(unittest.TestCase):
         cfg = dict(CFG)
         cfg["sources"] = json.loads(json.dumps(CFG["sources"]))
         cfg["sources"]["adzuna"]["calls_per_run"] = 20
+        cfg["sources"]["adzuna"]["enabled"] = True   # tested even while switched off in config.yml
         (self.dir / "config.yml").write_text(yaml.safe_dump(cfg))
         (self.dir / "docs").mkdir()
         shutil.copy(ROOT / "docs/skills.json", self.dir / "docs/skills.json")
@@ -227,6 +240,12 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(jobs["reed:9001"]["full_text"])
         self.assertEqual(jobs["reed:9001"]["url"], "https://careers.example.com/9001")
         self.assertEqual(jobs["reed:9001"]["closes"], "2026-11-25")
+        # A job board's advert is matched on the employer named in the title
+        self.assertIn("reed:9201", jobs)
+        self.assertEqual(jobs["reed:9201"]["company"], "Border to Coast Pensions Partnership (via eFinancialCareers)")
+        self.assertEqual(jobs["reed:9201"]["sponsor"]["register_name"], "Border to Coast Pensions Partnership Limited")
+        self.assertNotIn("reed:9202", jobs)   # "Business Analyst" isn't one of the targets
+        self.assertNotIn("reed:9203", jobs)   # posted more than 21 days ago
 
         # Rejected, for the right reasons
         for jid in ["adzuna:102", "adzuna:103", "adzuna:104", "adzuna:105", "adzuna:106", "adzuna:107",

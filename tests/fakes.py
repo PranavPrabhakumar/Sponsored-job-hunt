@@ -62,6 +62,8 @@ REGISTER_ROWS = [
     ("Small Analytics Co Ltd T/A Brightdata Insights", "Leeds", "", "Worker (B rating)", "Skilled Worker"),
     ("Charity Only Org", "York", "", "Temporary Worker (A rating)", "Charity Worker"),
     ("Hays Specialist Recruitment Limited", "London", "", "Worker (A rating)", "Skilled Worker"),
+    ("Border to Coast Pensions Partnership Limited", "Leeds", "", "Worker (A rating)", "Skilled Worker"),
+    ("eFinancialCareers Ltd", "London", "", "Worker (A rating)", "Skilled Worker"),
 ]
 
 
@@ -122,6 +124,12 @@ REED_RESULTS = {
         reed_job(9001, "Credit Analyst", "Barclays Execution Services", "Glasgow",
                  "Assess credit applications ... (snippet)", 36000, 40000),
         reed_job(9002, "Credit Analyst", "Aviva", "York", "Part time role", 20, 25),
+    ],
+    "risk analyst": [
+        reed_job(9201, "Enterprise Risk Management Analyst - Border to Coast Pensions Partnership", "eFinancialCareers", "Leeds",
+                 "Join our risk team. Excel and SQL. Visa sponsorship can be considered.", 40000, 45000),
+        reed_job(9202, "Cyber Business Analyst", "eFinancialCareers", "London", "Business analysis for cyber.", 50000, 55000),
+        reed_job(9203, "Risk Analyst", "Barclays Execution Services", "Glasgow", "Older advert", 40000, 42000, date="01/09/2026"),
     ],
     "data scientist": [
         reed_job(9101, "Graduate Data Scientist", "Monzo Bank", "London",

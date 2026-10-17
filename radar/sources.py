@@ -217,24 +217,33 @@ def fetch_reed(session, cfg, api_key, sleep=0.5):
     if not api_key:
         res.skipped = "no API key yet (add REED_API_KEY to the repository secrets)"
         return res
+    take = int(src.get("results_to_take", 100))
+    pages = max(1, int(src.get("pages_per_search", 2)))
+    refused = False
     for target, search in all_searches(cfg):
-        params = {"keywords": search, "resultsToTake": int(src.get("results_to_take", 100))}
-        if src.get("direct_employers_only", True):
-            params["postedByDirectEmployer"] = "true"
-        try:
-            r = session.get(REED_SEARCH_URL, params=params, auth=(api_key, ""), timeout=30)
-            res.calls += 1
-            r.raise_for_status()
-            for item in (r.json() or {}).get("results") or []:
-                job = norm_reed(item, target, search)
-                if job["title"] and job["url"]:
-                    res.jobs.append(job)
-        except Exception as exc:
-            res.errors.append(f"'{search}': {_http_error(exc)}")
-            if getattr(getattr(exc, "response", None), "status_code", None) in (401, 403):
+        for page in range(pages):
+            params = {"keywords": search, "resultsToTake": take, "resultsToSkip": page * take}
+            if src.get("direct_employers_only", True):
+                params["postedByDirectEmployer"] = "true"
+            try:
+                r = session.get(REED_SEARCH_URL, params=params, auth=(api_key, ""), timeout=30)
+                res.calls += 1
+                r.raise_for_status()
+                items = (r.json() or {}).get("results") or []
+                for item in items:
+                    job = norm_reed(item, target, search)
+                    if job["title"] and job["url"]:
+                        res.jobs.append(job)
+            except Exception as exc:
+                res.errors.append(f"'{search}': {_http_error(exc)}")
+                refused = getattr(getattr(exc, "response", None), "status_code", None) in (401, 403)
                 break
-        if sleep:
-            time.sleep(sleep)
+            if sleep:
+                time.sleep(sleep)
+            if len(items) < take:
+                break
+        if refused:
+            break
     return res
 
 
