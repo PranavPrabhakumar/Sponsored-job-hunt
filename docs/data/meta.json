@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-10-19T05:36+01:00",
+ "generated_at": "2026-10-19T14:07+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39200257046",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39257413626",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6ad1d58449ba86d6c953ca9d/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-16.csv",
-   "file_date": "2026-10-16",
-   "updated": "2026-10-16T09:14:51+01:00",
-   "rows": 143211,
-   "skilled_worker_sponsors": 127209
+   "url": "https://assets.publishing.service.gov.uk/media/6ad5d304a89985bb9702682e/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-19.csv",
+   "file_date": "2026-10-19",
+   "updated": "2026-10-19T09:25:45+01:00",
+   "rows": 143180,
+   "skilled_worker_sponsors": 127185
   },
   "adzuna": {
    "calls": 0,
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1455,
+   "found": 1467,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 1
   }
  },
  "targets": [
@@ -90,24 +90,25 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 0
+  "quiet_hours": false
  },
  "counts": {
-  "checked": 0,
+  "checked": 45,
   "kept": 0,
-  "rejected": 0,
+  "rejected": 45,
   "showing": 5,
   "removed_by_new_rules": 0
  },
- "rejected": {},
+ "rejected": {
+  "title has 'manager'": 20,
+  "title doesn't match your targets": 15,
+  "title has 'engineer'": 7,
+  "salary below the visa minimum": 1,
+  "title has 'senior'": 1,
+  "older listing": 1
+ },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-17T15:23+01:00",
-   "checked": 0,
-   "kept": 0
-  },
   {
    "at": "2026-10-17T15:33+01:00",
    "checked": 715,
@@ -161,6 +162,11 @@
   {
    "at": "2026-10-19T05:36+01:00",
    "checked": 0,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-19T14:07+01:00",
+   "checked": 45,
    "kept": 0
   }
  ]
