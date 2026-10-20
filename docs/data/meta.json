@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-10-20T05:45+01:00",
+ "generated_at": "2026-10-20T12:31+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39371218403",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39415541974",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6ad5d304a89985bb9702682e/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-19.csv",
-   "file_date": "2026-10-19",
-   "updated": "2026-10-19T09:25:45+01:00",
-   "rows": 143180,
-   "skilled_worker_sponsors": 127185
+   "url": "https://assets.publishing.service.gov.uk/media/6ad71d3d67af5c09d047985e/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-20.csv",
+   "file_date": "2026-10-20",
+   "updated": "2026-10-20T09:40:36+01:00",
+   "rows": 143175,
+   "skilled_worker_sponsors": 127189
   },
   "adzuna": {
    "calls": 0,
@@ -90,26 +90,24 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 0
+  "quiet_hours": false
  },
  "counts": {
-  "checked": 1,
+  "checked": 56,
   "kept": 0,
-  "rejected": 1,
+  "rejected": 56,
   "showing": 5,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title doesn't match your targets": 1
+  "title has 'manager'": 19,
+  "salary below the visa minimum": 17,
+  "title doesn't match your targets": 13,
+  "title has 'engineer'": 6,
+  "older listing": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-17T21:34+01:00",
-   "checked": 6,
-   "kept": 0
-  },
   {
    "at": "2026-10-18T01:01+01:00",
    "checked": 0,
@@ -163,6 +161,11 @@
   {
    "at": "2026-10-20T05:45+01:00",
    "checked": 1,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-20T12:31+01:00",
+   "checked": 56,
    "kept": 0
   }
  ]
