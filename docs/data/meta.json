@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-20T12:31+01:00",
+ "generated_at": "2026-10-20T17:59+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39415541974",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39462226512",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1477,
+   "found": 1484,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 2
   }
  },
  "targets": [
@@ -90,29 +90,34 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false
+  "quiet_hours": false,
+  "sent": 1,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 56,
-  "kept": 0,
-  "rejected": 56,
-  "showing": 5,
+  "checked": 17,
+  "kept": 1,
+  "rejected": 16,
+  "showing": 6,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 19,
-  "salary below the visa minimum": 17,
-  "title doesn't match your targets": 13,
-  "title has 'engineer'": 6,
-  "older listing": 1
+  "title doesn't match your targets": 6,
+  "title has 'manager'": 3,
+  "title has 'lead'": 2,
+  "older listing": 2,
+  "recruitment agency, employer not named": 1,
+  "title has 'senior'": 1,
+  "title has 'head'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-18T01:01+01:00",
-   "checked": 0,
-   "kept": 0
-  },
   {
    "at": "2026-10-18T05:27+01:00",
    "checked": 1,
@@ -167,6 +172,11 @@
    "at": "2026-10-20T12:31+01:00",
    "checked": 56,
    "kept": 0
+  },
+  {
+   "at": "2026-10-20T17:59+01:00",
+   "checked": 17,
+   "kept": 1
   }
  ]
 }
