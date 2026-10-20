@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-20T00:37+01:00",
+ "generated_at": "2026-10-20T05:45+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39342665854",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39371218403",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,7 +20,7 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1480,
+   "found": 1477,
    "ok": true,
    "detail_calls": 0
   }
@@ -94,24 +94,17 @@
   "held": 0
  },
  "counts": {
-  "checked": 3,
+  "checked": 1,
   "kept": 0,
-  "rejected": 3,
+  "rejected": 1,
   "showing": 5,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'senior'": 1,
-  "older listing": 1,
   "title doesn't match your targets": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-17T18:08+01:00",
-   "checked": 4,
-   "kept": 0
-  },
   {
    "at": "2026-10-17T21:34+01:00",
    "checked": 6,
@@ -165,6 +158,11 @@
   {
    "at": "2026-10-20T00:37+01:00",
    "checked": 3,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-20T05:45+01:00",
+   "checked": 1,
    "kept": 0
   }
  ]
