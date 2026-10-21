@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-10-21T08:35+01:00",
+ "generated_at": "2026-10-21T14:45+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39562968391",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/39610678913",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6ad71d3d67af5c09d047985e/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-20.csv",
-   "file_date": "2026-10-20",
-   "updated": "2026-10-20T09:40:36+01:00",
-   "rows": 143175,
-   "skilled_worker_sponsors": 127189
+   "url": "https://assets.publishing.service.gov.uk/media/6ad871b15eadc3d6e8a10870/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-21.csv",
+   "file_date": "2026-10-21",
+   "updated": "2026-10-21T09:19:27+01:00",
+   "rows": 143184,
+   "skilled_worker_sponsors": 127208
   },
   "adzuna": {
    "calls": 0,
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1470,
+   "found": 1478,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 1
   }
  },
  "targets": [
@@ -93,27 +93,24 @@
   "quiet_hours": false
  },
  "counts": {
-  "checked": 41,
+  "checked": 20,
   "kept": 0,
-  "rejected": 41,
+  "rejected": 20,
   "showing": 6,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 19,
-  "salary below the visa minimum": 14,
+  "title doesn't match your targets": 8,
+  "title has 'senior'": 3,
   "title has 'engineer'": 3,
-  "title doesn't match your targets": 2,
   "title has 'business analyst'": 2,
-  "title has 'senior'": 1
+  "salary below the visa minimum": 1,
+  "recruitment agency, employer not named": 1,
+  "title has 'manager'": 1,
+  "older listing": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-18T19:37+01:00",
-   "checked": 0,
-   "kept": 0
-  },
   {
    "at": "2026-10-18T23:24+01:00",
    "checked": 0,
@@ -167,6 +164,11 @@
   {
    "at": "2026-10-21T08:35+01:00",
    "checked": 41,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-21T14:45+01:00",
+   "checked": 20,
    "kept": 0
   }
  ]
