@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-23T19:18+01:00",
+ "generated_at": "2026-10-24T00:07+01:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40002153512",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40037806392",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1456,
+   "found": 1455,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 1
   }
  },
  "targets": [
@@ -90,28 +90,22 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false
+  "quiet_hours": true,
+  "held": 0
  },
  "counts": {
-  "checked": 9,
+  "checked": 2,
   "kept": 0,
-  "rejected": 9,
+  "rejected": 2,
   "showing": 7,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title doesn't match your targets": 5,
-  "title has 'engineer'": 2,
-  "employer not on the sponsor register": 1,
-  "older listing": 1
+  "short fixed-term contract": 1,
+  "title doesn't match your targets": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-21T08:35+01:00",
-   "checked": 41,
-   "kept": 0
-  },
   {
    "at": "2026-10-21T14:45+01:00",
    "checked": 20,
@@ -165,6 +159,11 @@
   {
    "at": "2026-10-23T19:18+01:00",
    "checked": 9,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-24T00:07+01:00",
+   "checked": 2,
    "kept": 0
   }
  ]
