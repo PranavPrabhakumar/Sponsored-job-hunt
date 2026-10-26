@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-10-25T22:32+00:00",
+ "generated_at": "2026-10-26T04:41+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40240621715",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40270358089",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1465,
+   "found": 1459,
    "ok": true,
-   "detail_calls": 1
+   "detail_calls": 0
   }
  },
  "targets": [
@@ -101,15 +101,10 @@
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "recruitment agency, employer not named": 1
+  "title has 'business analyst'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-23T19:18+01:00",
-   "checked": 9,
-   "kept": 0
-  },
   {
    "at": "2026-10-24T00:07+01:00",
    "checked": 2,
@@ -162,6 +157,11 @@
   },
   {
    "at": "2026-10-25T22:32+00:00",
+   "checked": 1,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-26T04:41+00:00",
    "checked": 1,
    "kept": 0
   }
