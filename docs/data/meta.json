@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-10-26T04:41+00:00",
+ "generated_at": "2026-10-26T12:55+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40270358089",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40326216348",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6adb1b5ab62d80a107bc5c29/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-23.csv",
-   "file_date": "2026-10-23",
-   "updated": "2026-10-23T09:32:45+01:00",
-   "rows": 143205,
-   "skilled_worker_sponsors": 127231
+   "url": "https://assets.publishing.service.gov.uk/media/6adf10d9d798ae11e9bc5c97/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-26.csv",
+   "file_date": "2026-10-26",
+   "updated": "2026-10-26T09:06:10+00:00",
+   "rows": 143177,
+   "skilled_worker_sponsors": 127215
   },
   "adzuna": {
    "calls": 0,
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1459,
+   "found": 1474,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 2
   }
  },
  "targets": [
@@ -90,26 +90,35 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 0
+  "quiet_hours": false,
+  "sent": 2,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 1,
-  "kept": 0,
-  "rejected": 1,
-  "showing": 7,
+  "checked": 92,
+  "kept": 2,
+  "rejected": 90,
+  "showing": 9,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'business analyst'": 1
+  "salary below the visa minimum": 34,
+  "title has 'manager'": 19,
+  "title doesn't match your targets": 13,
+  "title has 'business analyst'": 12,
+  "title has 'engineer'": 7,
+  "employer not on the sponsor register": 2,
+  "title has 'senior'": 2,
+  "title has 'architect'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-24T00:07+01:00",
-   "checked": 2,
-   "kept": 0
-  },
   {
    "at": "2026-10-24T05:32+01:00",
    "checked": 0,
@@ -164,6 +173,11 @@
    "at": "2026-10-26T04:41+00:00",
    "checked": 1,
    "kept": 0
+  },
+  {
+   "at": "2026-10-26T12:55+00:00",
+   "checked": 92,
+   "kept": 2
   }
  ]
 }
