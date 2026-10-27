@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-10-27T04:59+00:00",
+ "generated_at": "2026-10-27T12:06+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40452722685",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40501128634",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6adf10d9d798ae11e9bc5c97/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-26.csv",
-   "file_date": "2026-10-26",
-   "updated": "2026-10-26T09:06:10+00:00",
-   "rows": 143177,
-   "skilled_worker_sponsors": 127215
+   "url": "https://assets.publishing.service.gov.uk/media/6ae067cd7b7111c482d809be/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-27.csv",
+   "file_date": "2026-10-27",
+   "updated": "2026-10-27T09:34:37+00:00",
+   "rows": 143175,
+   "skilled_worker_sponsors": 127214
   },
   "adzuna": {
    "calls": 0,
@@ -20,7 +20,7 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1474,
+   "found": 1461,
    "ok": true,
    "detail_calls": 0
   }
@@ -90,24 +90,24 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 0
+  "quiet_hours": false
  },
  "counts": {
-  "checked": 0,
+  "checked": 62,
   "kept": 0,
-  "rejected": 0,
+  "rejected": 62,
   "showing": 9,
   "removed_by_new_rules": 0
  },
- "rejected": {},
+ "rejected": {
+  "salary below the visa minimum": 30,
+  "title has 'manager'": 19,
+  "title doesn't match your targets": 7,
+  "title has 'engineer'": 5,
+  "title has 'senior'": 1
+ },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-24T19:46+01:00",
-   "checked": 1,
-   "kept": 0
-  },
   {
    "at": "2026-10-24T23:27+01:00",
    "checked": 0,
@@ -161,6 +161,11 @@
   {
    "at": "2026-10-27T04:59+00:00",
    "checked": 0,
+   "kept": 0
+  },
+  {
+   "at": "2026-10-27T12:06+00:00",
+   "checked": 62,
    "kept": 0
   }
  ]
