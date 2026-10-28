@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-10-28T08:25+00:00",
+ "generated_at": "2026-10-28T16:36+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40656654652",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/40727596346",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6ae067cd7b7111c482d809be/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-27.csv",
-   "file_date": "2026-10-27",
-   "updated": "2026-10-27T09:34:37+00:00",
-   "rows": 143175,
-   "skilled_worker_sponsors": 127214
+   "url": "https://assets.publishing.service.gov.uk/media/6ae1b8b3779378370fd80aab/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-28.csv",
+   "file_date": "2026-10-28",
+   "updated": "2026-10-28T09:00:05+00:00",
+   "rows": 143187,
+   "skilled_worker_sponsors": 127226
   },
   "adzuna": {
    "calls": 0,
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1457,
+   "found": 1459,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 2
   }
  },
  "targets": [
@@ -90,28 +90,35 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false
+  "quiet_hours": false,
+  "sent": 1,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 51,
-  "kept": 0,
-  "rejected": 51,
-  "showing": 12,
+  "checked": 17,
+  "kept": 1,
+  "rejected": 16,
+  "showing": 13,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "salary below the visa minimum": 19,
-  "title has 'manager'": 19,
-  "title doesn't match your targets": 7,
-  "title has 'engineer'": 6
+  "title doesn't match your targets": 4,
+  "title has 'engineer'": 3,
+  "title has 'manager'": 3,
+  "title has 'avp'": 2,
+  "advert says no sponsorship": 1,
+  "title has 'business analyst'": 1,
+  "title has 'director'": 1,
+  "title has 'senior'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-25T19:01+00:00",
-   "checked": 5,
-   "kept": 0
-  },
   {
    "at": "2026-10-25T22:32+00:00",
    "checked": 1,
@@ -166,6 +173,11 @@
    "at": "2026-10-28T08:25+00:00",
    "checked": 51,
    "kept": 0
+  },
+  {
+   "at": "2026-10-28T16:36+00:00",
+   "checked": 17,
+   "kept": 1
   }
  ]
 }
