@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-11-03T06:43+00:00",
+ "generated_at": "2026-11-03T16:13+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/41591690086",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/41671839457",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6ae84bbe713f8880fe54624f/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-02.csv",
-   "file_date": "2026-11-02",
-   "updated": "2026-11-02T08:39:02+00:00",
-   "rows": 143041,
-   "skilled_worker_sponsors": 127122
+   "url": "https://assets.publishing.service.gov.uk/media/6ae99fa55b14ba0182a272ab/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-03.csv",
+   "file_date": "2026-11-03",
+   "updated": "2026-11-03T11:03:27+00:00",
+   "rows": 143064,
+   "skilled_worker_sponsors": 127162
   },
   "adzuna": {
    "calls": 0,
@@ -20,7 +20,7 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1607,
+   "found": 1644,
    "ok": true,
    "detail_calls": 0
   }
@@ -90,27 +90,34 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 1
+  "quiet_hours": false,
+  "sent": 1,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 28,
+  "checked": 72,
   "kept": 0,
-  "rejected": 28,
+  "rejected": 72,
   "showing": 16,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title doesn't match your targets": 23,
-  "salary below the visa minimum": 5
+  "title has 'manager'": 30,
+  "title doesn't match your targets": 20,
+  "salary below the visa minimum": 14,
+  "title has 'business analyst'": 3,
+  "title has 'senior'": 2,
+  "title has 'lead'": 2,
+  "older listing": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-10-31T05:35+00:00",
-   "checked": 0,
-   "kept": 0
-  },
   {
    "at": "2026-10-31T12:20+00:00",
    "checked": 22,
@@ -164,6 +171,11 @@
   {
    "at": "2026-11-03T06:43+00:00",
    "checked": 28,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-03T16:13+00:00",
+   "checked": 72,
    "kept": 0
   }
  ]
