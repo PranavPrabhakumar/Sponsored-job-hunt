@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-05T17:59+00:00",
+ "generated_at": "2026-11-05T23:37+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/42079902362",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/42130732862",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1660,
+   "found": 1665,
    "ok": true,
-   "detail_calls": 1
+   "detail_calls": 0
   }
  },
  "targets": [
@@ -90,35 +90,22 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false,
-  "sent": 1,
-  "rule_changes": 0,
-  "channels": {
-   "github": {
-    "ok": true,
-    "issue": 1
-   }
-  }
+  "quiet_hours": true,
+  "held": 0
  },
  "counts": {
-  "checked": 12,
-  "kept": 1,
-  "rejected": 11,
+  "checked": 4,
+  "kept": 0,
+  "rejected": 4,
   "showing": 17,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title doesn't match your targets": 8,
-  "title has 'engineer'": 2,
-  "employer not on the sponsor register": 1
+  "title doesn't match your targets": 3,
+  "title has 'vp'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-02T05:57+00:00",
-   "checked": 4,
-   "kept": 0
-  },
   {
    "at": "2026-11-02T15:43+00:00",
    "checked": 111,
@@ -173,6 +160,11 @@
    "at": "2026-11-05T17:59+00:00",
    "checked": 12,
    "kept": 1
+  },
+  {
+   "at": "2026-11-05T23:37+00:00",
+   "checked": 4,
+   "kept": 0
   }
  ]
 }
