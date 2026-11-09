@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-09T09:44+00:00",
+ "generated_at": "2026-11-09T20:42+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/42595645612",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/42695495157",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1684,
+   "found": 1687,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 2
   }
  },
  "targets": [
@@ -90,30 +90,33 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false
+  "quiet_hours": false,
+  "sent": 2,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 40,
-  "kept": 0,
-  "rejected": 40,
-  "showing": 17,
+  "checked": 18,
+  "kept": 2,
+  "rejected": 16,
+  "showing": 19,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 19,
-  "title has 'engineer'": 7,
-  "salary below the visa minimum": 6,
   "title doesn't match your targets": 5,
-  "title has 'lead'": 2,
-  "employer not on the sponsor register": 1
+  "salary below the visa minimum": 4,
+  "title has 'business analyst'": 3,
+  "title has 'manager'": 2,
+  "employer not on the sponsor register": 1,
+  "title has 'engineer'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-06T15:54+00:00",
-   "checked": 93,
-   "kept": 0
-  },
   {
    "at": "2026-11-06T21:28+00:00",
    "checked": 5,
@@ -168,6 +171,11 @@
    "at": "2026-11-09T09:44+00:00",
    "checked": 40,
    "kept": 0
+  },
+  {
+   "at": "2026-11-09T20:42+00:00",
+   "checked": 18,
+   "kept": 2
   }
  ]
 }
