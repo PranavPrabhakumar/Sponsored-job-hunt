@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-10T12:35+00:00",
+ "generated_at": "2026-11-10T20:48+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/42817003307",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/42898792643",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,7 +20,7 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1689,
+   "found": 1686,
    "ok": true,
    "detail_calls": 0
   }
@@ -93,26 +93,22 @@
   "quiet_hours": false
  },
  "counts": {
-  "checked": 41,
+  "checked": 12,
   "kept": 0,
-  "rejected": 41,
+  "rejected": 12,
   "showing": 18,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 19,
-  "salary below the visa minimum": 11,
-  "title doesn't match your targets": 6,
-  "title has 'engineer'": 3,
-  "title has 'senior'": 2
+  "title doesn't match your targets": 3,
+  "employer not on the sponsor register": 2,
+  "salary below the visa minimum": 2,
+  "title has 'business analyst'": 2,
+  "title has 'senior'": 2,
+  "title has 'lead'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-07T08:44+00:00",
-   "checked": 26,
-   "kept": 0
-  },
   {
    "at": "2026-11-07T16:24+00:00",
    "checked": 5,
@@ -166,6 +162,11 @@
   {
    "at": "2026-11-10T12:35+00:00",
    "checked": 41,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-10T20:48+00:00",
+   "checked": 12,
    "kept": 0
   }
  ]
