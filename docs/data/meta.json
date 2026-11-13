@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-13T16:18+00:00",
+ "generated_at": "2026-11-13T23:30+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/43461247977",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/43527552795",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -90,36 +90,25 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false,
-  "sent": 1,
-  "rule_changes": 0,
-  "channels": {
-   "github": {
-    "ok": true,
-    "issue": 1
-   }
-  }
+  "quiet_hours": true,
+  "held": 0
  },
  "counts": {
-  "checked": 27,
-  "kept": 1,
-  "rejected": 26,
+  "checked": 7,
+  "kept": 0,
+  "rejected": 7,
   "showing": 20,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 20,
-  "title doesn't match your targets": 3,
-  "title has 'avp'": 2,
-  "title has 'senior'": 1
+  "title doesn't match your targets": 2,
+  "title has 'manager'": 2,
+  "older listing": 1,
+  "title has 'business analyst'": 1,
+  "recruitment agency, employer not named": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-10T04:06+00:00",
-   "checked": 3,
-   "kept": 0
-  },
   {
    "at": "2026-11-10T12:35+00:00",
    "checked": 41,
@@ -174,6 +163,11 @@
    "at": "2026-11-13T16:18+00:00",
    "checked": 27,
    "kept": 1
+  },
+  {
+   "at": "2026-11-13T23:30+00:00",
+   "checked": 7,
+   "kept": 0
   }
  ]
 }
