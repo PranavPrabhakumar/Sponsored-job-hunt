@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T06:22+00:00",
+ "generated_at": "2026-11-15T15:38+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/43685113371",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/43730974569",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,7 +20,7 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1689,
+   "found": 1687,
    "ok": true,
    "detail_calls": 0
   }
@@ -90,26 +90,21 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 0
+  "quiet_hours": false
  },
  "counts": {
-  "checked": 1,
+  "checked": 20,
   "kept": 0,
-  "rejected": 1,
+  "rejected": 20,
   "showing": 19,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 1
+  "title has 'manager'": 19,
+  "title doesn't match your targets": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-12T00:38+00:00",
-   "checked": 3,
-   "kept": 0
-  },
   {
    "at": "2026-11-12T09:46+00:00",
    "checked": 21,
@@ -163,6 +158,11 @@
   {
    "at": "2026-11-15T06:22+00:00",
    "checked": 1,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-15T15:38+00:00",
+   "checked": 20,
    "kept": 0
   }
  ]
