@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-16T20:26+00:00",
+ "generated_at": "2026-11-17T04:28+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/43949660789",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/44017333907",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1693,
+   "found": 1691,
    "ok": true,
-   "detail_calls": 15
+   "detail_calls": 0
   }
  },
  "targets": [
@@ -90,48 +90,23 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false,
-  "sent": 2,
-  "rule_changes": 0,
-  "channels": {
-   "github": {
-    "ok": true,
-    "issue": 1
-   }
-  }
+  "quiet_hours": true,
+  "held": 0
  },
  "counts": {
-  "checked": 138,
-  "kept": 2,
-  "rejected": 136,
-  "showing": 17,
+  "checked": 4,
+  "kept": 0,
+  "rejected": 4,
+  "showing": 16,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title doesn't match your targets": 55,
-  "title has 'senior'": 20,
-  "recruitment agency, employer not named": 10,
-  "title has 'avp'": 10,
-  "title has 'business analyst'": 8,
-  "salary below the visa minimum": 7,
-  "title has 'lead'": 7,
-  "title has 'manager'": 6,
-  "needs security clearance": 3,
-  "title has 'vp'": 3,
-  "title has 'director'": 2,
-  "older listing": 1,
-  "title has 'principal'": 1,
-  "title has 'architect'": 1,
-  "title has 'head'": 1,
-  "title has 'vice president'": 1
+  "title doesn't match your targets": 2,
+  "title has 'business analyst'": 1,
+  "title has 'director'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-13T16:18+00:00",
-   "checked": 27,
-   "kept": 1
-  },
   {
    "at": "2026-11-13T23:30+00:00",
    "checked": 7,
@@ -186,6 +161,11 @@
    "at": "2026-11-16T20:26+00:00",
    "checked": 138,
    "kept": 2
+  },
+  {
+   "at": "2026-11-17T04:28+00:00",
+   "checked": 4,
+   "kept": 0
   }
  ]
 }
