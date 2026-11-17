@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-17T04:28+00:00",
+ "generated_at": "2026-11-17T15:56+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/44017333907",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/44119897302",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
    "url": "https://assets.publishing.service.gov.uk/media/6af59528cc0dbfec767a5080/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-12.csv",
    "file_date": "2026-11-12",
-   "updated": "2026-11-12T11:45:34+00:00",
+   "updated": "2026-11-17T13:20:29+00:00",
    "rows": 142998,
    "skilled_worker_sponsors": 127129
   },
@@ -90,28 +90,25 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": true,
-  "held": 0
+  "quiet_hours": false
  },
  "counts": {
-  "checked": 4,
+  "checked": 49,
   "kept": 0,
-  "rejected": 4,
+  "rejected": 49,
   "showing": 16,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title doesn't match your targets": 2,
-  "title has 'business analyst'": 1,
-  "title has 'director'": 1
+  "title has 'manager'": 20,
+  "salary below the visa minimum": 16,
+  "title doesn't match your targets": 5,
+  "title has 'engineer'": 5,
+  "title has 'senior'": 2,
+  "title has 'lead'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-13T23:30+00:00",
-   "checked": 7,
-   "kept": 0
-  },
   {
    "at": "2026-11-14T06:14+00:00",
    "checked": 3,
@@ -165,6 +162,11 @@
   {
    "at": "2026-11-17T04:28+00:00",
    "checked": 4,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-17T15:56+00:00",
+   "checked": 49,
    "kept": 0
   }
  ]
