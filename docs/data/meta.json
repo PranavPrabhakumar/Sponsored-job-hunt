@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-11-19T10:16+00:00",
+ "generated_at": "2026-11-19T18:59+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/44504024218",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/44593590008",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6afd90442ee8ec8187b57050/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-18.csv",
-   "file_date": "2026-11-18",
-   "updated": "2026-11-18T12:07:55+00:00",
-   "rows": 142988,
-   "skilled_worker_sponsors": 127159
+   "url": "https://assets.publishing.service.gov.uk/media/6afed3a5d367b3459e423f65/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-19.csv",
+   "file_date": "2026-11-19",
+   "updated": "2026-11-19T10:48:33+00:00",
+   "rows": 142945,
+   "skilled_worker_sponsors": 127129
   },
   "adzuna": {
    "calls": 0,
@@ -19,11 +19,10 @@
    "ok": false
   },
   "reed": {
-   "calls": 16,
-   "found": 1392,
-   "error": "'business intelligence analyst': ConnectionError: HTTPSConnectionPool(host='www.reed.co.uk', port=443): Max retries exceeded with url: /api/1.0/search?keywords=business+intelligence+analyst&resultsToTake=100&resultsToSkip=100&postedByDirectEmployer=true (Caused by ReadTimeoutError(\"HTTPSConnectionPool(host='www.reed.co.uk', port=443): Read timed out. (read timeout=30)\"))",
-   "ok": false,
-   "detail_calls": 0
+   "calls": 19,
+   "found": 1692,
+   "ok": true,
+   "detail_calls": 1
   }
  },
  "targets": [
@@ -91,29 +90,31 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false
+  "quiet_hours": false,
+  "sent": 1,
+  "rule_changes": 0,
+  "channels": {
+   "github": {
+    "ok": true,
+    "issue": 1
+   }
+  }
  },
  "counts": {
-  "checked": 22,
-  "kept": 0,
-  "rejected": 22,
+  "checked": 15,
+  "kept": 1,
+  "rejected": 14,
   "showing": 16,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 16,
-  "title doesn't match your targets": 2,
-  "title has 'senior'": 2,
-  "employer not on the sponsor register": 1,
-  "title has 'engineer'": 1
+  "title has 'manager'": 8,
+  "title doesn't match your targets": 4,
+  "title has 'senior'": 1,
+  "title has 'lead'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-15T15:38+00:00",
-   "checked": 20,
-   "kept": 0
-  },
   {
    "at": "2026-11-15T21:01+00:00",
    "checked": 1,
@@ -168,6 +169,11 @@
    "at": "2026-11-19T10:16+00:00",
    "checked": 22,
    "kept": 0
+  },
+  {
+   "at": "2026-11-19T18:59+00:00",
+   "checked": 15,
+   "kept": 1
   }
  ]
 }
