@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-24T14:49+00:00",
+ "generated_at": "2026-11-25T00:40+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/45418344577",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/45519841989",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1689,
+   "found": 1691,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 1
   }
  },
  "targets": [
@@ -90,38 +90,27 @@
   "errors": []
  },
  "alerts": {
-  "quiet_hours": false,
-  "sent": 1,
-  "rule_changes": 0,
-  "channels": {
-   "github": {
-    "ok": true,
-    "issue": 1
-   }
-  }
+  "quiet_hours": true,
+  "held": 0
  },
  "counts": {
-  "checked": 116,
+  "checked": 15,
   "kept": 0,
-  "rejected": 116,
+  "rejected": 15,
   "showing": 16,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "salary below the visa minimum": 43,
-  "older listing": 31,
-  "title has 'manager'": 19,
-  "title doesn't match your targets": 13,
-  "title has 'engineer'": 8,
-  "title has 'senior'": 2
+  "title has 'manager'": 5,
+  "title doesn't match your targets": 3,
+  "title has 'lecturer'": 2,
+  "title has 'business analyst'": 2,
+  "short fixed-term contract": 1,
+  "title has 'senior'": 1,
+  "title has 'vice president'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-20T18:36+00:00",
-   "checked": 8,
-   "kept": 0
-  },
   {
    "at": "2026-11-21T01:29+00:00",
    "checked": 0,
@@ -175,6 +164,11 @@
   {
    "at": "2026-11-24T14:49+00:00",
    "checked": 116,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-25T00:40+00:00",
+   "checked": 15,
    "kept": 0
   }
  ]
