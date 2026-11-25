@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-11-25T11:13+00:00",
+ "generated_at": "2026-11-25T21:38+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/45602428335",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/45706143354",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
    "url": "https://assets.publishing.service.gov.uk/media/6b058455d2f0c0b2b3138ed3/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-24.csv",
    "file_date": "2026-11-24",
-   "updated": "2026-11-24T12:43:20+00:00",
+   "updated": "2026-11-25T11:16:18+00:00",
    "rows": 142855,
    "skilled_worker_sponsors": 127047
   },
@@ -20,9 +20,9 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1690,
+   "found": 1694,
    "ok": true,
-   "detail_calls": 0
+   "detail_calls": 2
   }
  },
  "targets": [
@@ -93,28 +93,23 @@
   "quiet_hours": false
  },
  "counts": {
-  "checked": 125,
+  "checked": 20,
   "kept": 0,
-  "rejected": 125,
+  "rejected": 20,
   "showing": 16,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "salary below the visa minimum": 30,
-  "title has 'manager'": 30,
-  "title has 'business analyst'": 22,
-  "title has 'engineer'": 21,
-  "title doesn't match your targets": 20,
-  "older listing": 1,
-  "title has 'lead'": 1
+  "title doesn't match your targets": 6,
+  "title has 'senior'": 5,
+  "title has 'manager'": 3,
+  "title has 'business analyst'": 2,
+  "recruitment agency, employer not named": 2,
+  "title has 'engineer'": 1,
+  "older listing": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-21T09:44+00:00",
-   "checked": 20,
-   "kept": 0
-  },
   {
    "at": "2026-11-21T17:27+00:00",
    "checked": 0,
@@ -168,6 +163,11 @@
   {
    "at": "2026-11-25T11:13+00:00",
    "checked": 125,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-25T21:38+00:00",
+   "checked": 20,
    "kept": 0
   }
  ]
