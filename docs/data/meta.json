@@ -1,16 +1,16 @@
 {
- "generated_at": "2026-11-27T08:21+00:00",
+ "generated_at": "2026-11-27T19:27+00:00",
  "repo": "PranavPrabhakumar/Sponsored-job-hunt",
- "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/45965033231",
+ "run_url": "https://github.com/PranavPrabhakumar/Sponsored-job-hunt/actions/runs/46056789293",
  "schedule": "every 2 hours",
  "sources": {
   "register": {
    "ok": true,
-   "url": "https://assets.publishing.service.gov.uk/media/6b082c05091d49d03c56c0c9/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-26.csv",
-   "file_date": "2026-11-26",
-   "updated": "2026-11-26T12:55:47+00:00",
-   "rows": 142844,
-   "skilled_worker_sponsors": 127037
+   "url": "https://assets.publishing.service.gov.uk/media/6b095b82c29db7468056c17e/SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-11-27.csv",
+   "file_date": "2026-11-27",
+   "updated": "2026-11-27T10:34:57+00:00",
+   "rows": 142604,
+   "skilled_worker_sponsors": 126829
   },
   "adzuna": {
    "calls": 0,
@@ -20,7 +20,7 @@
   },
   "reed": {
    "calls": 19,
-   "found": 1700,
+   "found": 1697,
    "ok": true,
    "detail_calls": 0
   }
@@ -93,24 +93,25 @@
   "quiet_hours": false
  },
  "counts": {
-  "checked": 25,
+  "checked": 24,
   "kept": 0,
-  "rejected": 25,
-  "showing": 13,
+  "rejected": 24,
+  "showing": 12,
   "removed_by_new_rules": 0
  },
  "rejected": {
-  "title has 'manager'": 20,
-  "title doesn't match your targets": 4,
-  "title has 'engineer'": 1
+  "title doesn't match your targets": 9,
+  "title has 'manager'": 3,
+  "older listing": 3,
+  "title has 'engineer'": 3,
+  "title has 'senior'": 2,
+  "title has 'lead'": 1,
+  "title has 'vp'": 1,
+  "title has 'avp'": 1,
+  "title has 'head'": 1
  },
  "dashboard": "https://pranavprabhakumar.github.io/Sponsored-job-hunt/",
  "recent_runs": [
-  {
-   "at": "2026-11-22T21:46+00:00",
-   "checked": 0,
-   "kept": 0
-  },
   {
    "at": "2026-11-23T02:42+00:00",
    "checked": 1,
@@ -164,6 +165,11 @@
   {
    "at": "2026-11-27T08:21+00:00",
    "checked": 25,
+   "kept": 0
+  },
+  {
+   "at": "2026-11-27T19:27+00:00",
+   "checked": 24,
    "kept": 0
   }
  ]
